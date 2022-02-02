@@ -6,6 +6,7 @@ import java.util.List;
 
 import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.FollowService;
+import edu.byu.cs.tweeter.client.model.service.LoginService;
 import edu.byu.cs.tweeter.client.model.service.StatusService;
 import edu.byu.cs.tweeter.client.view.main.MainActivity;
 import edu.byu.cs.tweeter.model.domain.User;
@@ -16,6 +17,7 @@ public class MainPresenter {
 
         void followSuccessful();
         void unFollowSuccessful();
+        void logoutSuccessful();
 
         void postSuccessful();
 
@@ -28,13 +30,15 @@ public class MainPresenter {
     }
 
     private View view;
-    FollowService followService;
-    StatusService statusService;
+    private FollowService followService;
+    private StatusService statusService;
+    private LoginService loginService;
 
     public MainPresenter(View view){
         this.view = view;
         followService = new FollowService();
         statusService = new StatusService();
+        loginService = new LoginService();
     }
 
     public void unfollow(User user) {
@@ -58,6 +62,29 @@ public class MainPresenter {
 
     public void isFollower(User user){
         followService.isFollower(Cache.getInstance().getCurrUserAuthToken(),Cache.getInstance().getCurrUser(), user, new IsFollowerObserver());
+    }
+
+    public void logout(){
+        loginService.logout(Cache.getInstance().getCurrUserAuthToken(), new LogoutObserver());
+    }
+
+
+    public class LogoutObserver implements LoginService.LogoutObserver{
+
+        @Override
+        public void handleSuccess() {
+            view.logoutSuccessful();
+        }
+
+        @Override
+        public void handleFailure(String message) {
+            view.displayErrorMessage("Failed to logout: " + message);
+        }
+
+        @Override
+        public void handleException(Exception exception) {
+            view.displayErrorMessage("Failed to logout because of exception: " + exception.getMessage());
+        }
     }
 
     public class GetFollowingCountObserver implements FollowService.GetFollowingCountObserver{
