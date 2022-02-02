@@ -10,25 +10,18 @@ import java.util.Base64;
 
 import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.LoginService;
-import edu.byu.cs.tweeter.client.view.login.RegisterFragment;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 
 public class RegisterPresenter {
-    public interface View{
-        void displayErrorMessage(String message);
-        void registered(User user);
-    }
-    private View view;
-    private LoginService loginService;
-
-    public RegisterPresenter(View view){
+    private final View view;
+    private final LoginService loginService;
+    public RegisterPresenter(View view) {
         this.view = view;
         loginService = new LoginService();
     }
 
-
-    public String imageViewToString(ImageView imageToUpload){
+    public String imageViewToString(ImageView imageToUpload) {
         // Convert image to byte array.
         Bitmap image = ((BitmapDrawable) imageToUpload.getDrawable()).getBitmap();
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -40,7 +33,7 @@ public class RegisterPresenter {
         return imageBytesBase64;
     }
 
-    public void validateRegistration(EditText firstName, EditText lastName, EditText alias, EditText password, ImageView imageToUpload) throws IllegalArgumentException{
+    public void validateRegistration(EditText firstName, EditText lastName, EditText alias, EditText password, ImageView imageToUpload) throws IllegalArgumentException {
         if (firstName.getText().length() == 0) {
             throw new IllegalArgumentException("First Name cannot be empty.");
         }
@@ -70,7 +63,13 @@ public class RegisterPresenter {
                 alias.getText().toString(), password.getText().toString(), imageBytesBase64, new RegisterObserver());
     }
 
-    public class RegisterObserver implements LoginService.RegisterObserver{
+    public interface View {
+        void displayErrorMessage(String message);
+
+        void registered(User user);
+    }
+
+    public class RegisterObserver implements LoginService.RegisterObserver {
 
         @Override
         public void handleSuccess(User registeredUser, AuthToken authToken) {

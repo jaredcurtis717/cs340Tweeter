@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,12 +22,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import edu.byu.cs.client.R;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowingTask;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetUserTask;
 import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.presenter.FollowingPresenter;
 import edu.byu.cs.tweeter.client.view.main.MainActivity;
@@ -98,10 +93,9 @@ public class FollowingFragment extends Fragment implements FollowingPresenter.Vi
 
     @Override
     public void setLoadingStatus(boolean value) {
-        if (value){
+        if (value) {
             followingRecyclerViewAdapter.addLoadingFooter();
-        }
-        else{
+        } else {
             followingRecyclerViewAdapter.removeLoadingFooter();
         }
     }
@@ -170,7 +164,6 @@ public class FollowingFragment extends Fragment implements FollowingPresenter.Vi
     private class FollowingRecyclerViewAdapter extends RecyclerView.Adapter<FollowingHolder> {
 
         private final List<User> users = new ArrayList<>();
-
 
 
         /**
@@ -292,7 +285,6 @@ public class FollowingFragment extends Fragment implements FollowingPresenter.Vi
         private void removeLoadingFooter() {
             removeItem(users.get(users.size() - 1));
         }
-
 
 
     }

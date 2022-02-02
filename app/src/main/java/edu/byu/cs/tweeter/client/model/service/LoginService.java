@@ -1,43 +1,73 @@
 package edu.byu.cs.tweeter.client.model.service;
 
-import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.LoginTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.LogoutTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.RegisterTask;
-import edu.byu.cs.tweeter.client.view.login.LoginFragment;
-import edu.byu.cs.tweeter.client.view.login.RegisterFragment;
-import edu.byu.cs.tweeter.client.view.main.MainActivity;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 
 public class LoginService {
 
-    public interface LogoutObserver{
-        void handleSuccess();
-        void handleFailure(String message);
-        void handleException(Exception exception);
-    }
     public void logout(AuthToken authToken, LogoutObserver logoutObserver) {
         LogoutTask logoutTask = new LogoutTask(authToken, new LogoutHandler(logoutObserver));
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(logoutTask);
     }
+
+    public void register(String firstName, String lastName, String alias, String password, String image, RegisterObserver registerObserver) {
+        // Send register request.
+        RegisterTask registerTask = new RegisterTask(firstName, lastName,
+                alias, password, image, new RegisterHandler(registerObserver));
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.execute(registerTask);
+    }
+
+    public void login(String alias, String password, LoginObserver loginObserver) {
+        LoginTask loginTask = new LoginTask(alias, password, new LoginHandler(loginObserver));
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.execute(loginTask);
+    }
+
+    public interface LogoutObserver {
+        void handleSuccess();
+
+        void handleFailure(String message);
+
+        void handleException(Exception exception);
+    }
+
+    public interface RegisterObserver {
+        void handleSuccess(User user, AuthToken authToken);
+
+        void handleFailure(String message);
+
+        void handleException(Exception exception);
+    }
+
+    public interface LoginObserver {
+        void handleSuccess(User user, AuthToken authToken);
+
+        void handleFailure(String message);
+
+        void handleException(Exception exception);
+    }
+
     private class LogoutHandler extends Handler {
-        private LogoutObserver observer;
-        public LogoutHandler(LogoutObserver observer){
+        private final LogoutObserver observer;
+
+        public LogoutHandler(LogoutObserver observer) {
             this.observer = observer;
         }
+
         @Override
         public void handleMessage(@NonNull Message msg) {
             boolean success = msg.getData().getBoolean(LogoutTask.SUCCESS_KEY);
@@ -53,24 +83,13 @@ public class LoginService {
         }
     }
 
-    public interface RegisterObserver{
-        void handleSuccess(User user, AuthToken authToken);
-        void handleFailure(String message);
-        void handleException(Exception exception);
-    }
-    public void register(String firstName, String lastName, String alias, String password, String image, RegisterObserver registerObserver){
-        // Send register request.
-        RegisterTask registerTask = new RegisterTask(firstName, lastName,
-                alias, password, image, new RegisterHandler(registerObserver));
-
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(registerTask);
-    }
     private class RegisterHandler extends Handler {
-        private RegisterObserver observer;
-        public RegisterHandler(RegisterObserver observer){
+        private final RegisterObserver observer;
+
+        public RegisterHandler(RegisterObserver observer) {
             this.observer = observer;
         }
+
         @Override
         public void handleMessage(@NonNull Message msg) {
             boolean success = msg.getData().getBoolean(RegisterTask.SUCCESS_KEY);
@@ -89,27 +108,16 @@ public class LoginService {
         }
     }
 
-
-
-    public interface LoginObserver{
-        void handleSuccess(User user, AuthToken authToken);
-        void handleFailure(String message);
-        void handleException(Exception exception);
-    }
-    public void login(String alias, String password, LoginObserver loginObserver){
-        LoginTask loginTask = new LoginTask(alias, password, new LoginHandler(loginObserver));
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(loginTask);
-    }
-
     /**
      * Message handler (i.e., observer) for LoginTask
      */
     private class LoginHandler extends Handler {
-        private LoginObserver observer;
-        public LoginHandler(LoginObserver observer){
+        private final LoginObserver observer;
+
+        public LoginHandler(LoginObserver observer) {
             this.observer = observer;
         }
+
         @Override
         public void handleMessage(@NonNull Message msg) {
             boolean success = msg.getData().getBoolean(LoginTask.SUCCESS_KEY);

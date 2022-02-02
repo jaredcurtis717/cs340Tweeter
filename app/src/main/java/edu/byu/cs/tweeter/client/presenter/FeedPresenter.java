@@ -1,13 +1,10 @@
 package edu.byu.cs.tweeter.client.presenter;
 
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.StatusService;
 import edu.byu.cs.tweeter.client.model.service.UserService;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetUserTask;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 
@@ -16,21 +13,10 @@ public class FeedPresenter {
     private boolean isLoading;
     private boolean hasMorePages;
     private Status lastStatus;
-
-    public interface View{
-        void gotFeed(List<Status> statuses);
-        void removeLoadingFooterInView();
-        void displayErrorMessage(String message);
-        void addLoadingFooter();
-        void gotUser(User user);
-    }
-
-    private View view;
-
-    private StatusService statusService;
-    private UserService userService;
-
-    public FeedPresenter(View view){
+    private final View view;
+    private final StatusService statusService;
+    private final UserService userService;
+    public FeedPresenter(View view) {
         this.view = view;
         statusService = new StatusService();
         userService = new UserService();
@@ -41,12 +27,12 @@ public class FeedPresenter {
         return isLoading;
     }
 
-    public void setHasMorePages(boolean hasMorePages) {
-        this.hasMorePages = hasMorePages;
+    public boolean getHasMorePages() {
+        return hasMorePages;
     }
 
-    public boolean getHasMorePages(){
-        return hasMorePages;
+    public void setHasMorePages(boolean hasMorePages) {
+        this.hasMorePages = hasMorePages;
     }
 
     public void getFeed(User user) {
@@ -55,11 +41,23 @@ public class FeedPresenter {
         statusService.getFeed(Cache.getInstance().getCurrUserAuthToken(), user, PAGE_SIZE, lastStatus, new GetFeedObserver());
     }
 
-    public void getUser(String user){
+    public void getUser(String user) {
         userService.getUser(Cache.getInstance().getCurrUserAuthToken(), user, new GetUserObserver());
     }
 
-    private class GetUserObserver implements UserService.GetUserObserver{
+    public interface View {
+        void gotFeed(List<Status> statuses);
+
+        void removeLoadingFooterInView();
+
+        void displayErrorMessage(String message);
+
+        void addLoadingFooter();
+
+        void gotUser(User user);
+    }
+
+    private class GetUserObserver implements UserService.GetUserObserver {
 
         @Override
         public void handleSuccess(User user) {
@@ -77,7 +75,7 @@ public class FeedPresenter {
         }
     }
 
-    private class GetFeedObserver implements StatusService.GetFeedObserver{
+    private class GetFeedObserver implements StatusService.GetFeedObserver {
 
         @Override
         public void handleSuccess(List<Status> statuses, boolean hasMorePages) {

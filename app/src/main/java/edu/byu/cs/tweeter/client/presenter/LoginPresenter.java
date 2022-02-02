@@ -1,29 +1,21 @@
 package edu.byu.cs.tweeter.client.presenter;
 
-import android.content.Intent;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.LoginService;
-import edu.byu.cs.tweeter.client.view.main.MainActivity;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 
 public class LoginPresenter {
-    public interface View{
-        void displayErrorMessage(String message);
-        void loggedIn(User user);
-    }
-    private View view;
-    private LoginService loginService;
-
-    public LoginPresenter(View view){
+    private final View view;
+    private final LoginService loginService;
+    public LoginPresenter(View view) {
         this.view = view;
         loginService = new LoginService();
     }
 
-    public void login(EditText alias, EditText password){
+    public void login(EditText alias, EditText password) {
         loginService.login(alias.getText().toString(), password.getText().toString(), new LoginObserver());
     }
 
@@ -39,7 +31,13 @@ public class LoginPresenter {
         }
     }
 
-    private class LoginObserver implements LoginService.LoginObserver{
+    public interface View {
+        void displayErrorMessage(String message);
+
+        void loggedIn(User user);
+    }
+
+    private class LoginObserver implements LoginService.LoginObserver {
 
         @Override
         public void handleSuccess(User loggedInUser, AuthToken authToken) {

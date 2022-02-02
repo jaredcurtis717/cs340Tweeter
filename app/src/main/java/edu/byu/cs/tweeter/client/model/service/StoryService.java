@@ -2,7 +2,6 @@ package edu.byu.cs.tweeter.client.model.service;
 
 import android.os.Handler;
 import android.os.Message;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -17,14 +16,6 @@ import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 
 public class StoryService {
-    public interface GetStoryObserver{
-        void handleSuccess(List<Status> statuses, boolean hasMorePages, Status lastStatus);
-        void handleFailure(String message);
-        void handleException(Exception exception);
-        void removeLoadingFooter();
-        void setLoading(boolean value);
-    }
-
     public void getStory(AuthToken authToken, User user, int pageSize, Status lastStatus, GetStoryObserver getStoryObserver) {
         GetStoryTask getStoryTask = new GetStoryTask(Cache.getInstance().getCurrUserAuthToken(),
                 user, pageSize, lastStatus, new GetStoryHandler(getStoryObserver));
@@ -32,15 +23,28 @@ public class StoryService {
         executor.execute(getStoryTask);
     }
 
+    public interface GetStoryObserver {
+        void handleSuccess(List<Status> statuses, boolean hasMorePages, Status lastStatus);
+
+        void handleFailure(String message);
+
+        void handleException(Exception exception);
+
+        void removeLoadingFooter();
+
+        void setLoading(boolean value);
+    }
 
     /**
      * Message handler (i.e., observer) for GetStoryTask.
      */
     private class GetStoryHandler extends Handler {
-        private GetStoryObserver observer;
-        public GetStoryHandler(GetStoryObserver observer){
+        private final GetStoryObserver observer;
+
+        public GetStoryHandler(GetStoryObserver observer) {
             this.observer = observer;
         }
+
         @Override
         public void handleMessage(@NonNull Message msg) {
             observer.setLoading(false);

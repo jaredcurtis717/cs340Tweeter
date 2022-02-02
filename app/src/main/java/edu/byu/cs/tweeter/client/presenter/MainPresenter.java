@@ -12,11 +12,13 @@ import edu.byu.cs.tweeter.client.view.main.MainActivity;
 import edu.byu.cs.tweeter.model.domain.User;
 
 public class MainPresenter {
-    public interface View{
+    public interface View {
         void displayErrorMessage(String message);
 
         void followSuccessful();
+
         void unFollowSuccessful();
+
         void logoutSuccessful();
 
         void postSuccessful();
@@ -24,6 +26,7 @@ public class MainPresenter {
         void setFollowButtonEnabled(boolean value);
 
         void setFollowersCount(int count);
+
         void setFollowingCount(int count);
 
         void setIsFollower(boolean value);
@@ -34,7 +37,7 @@ public class MainPresenter {
     private StatusService statusService;
     private LoginService loginService;
 
-    public MainPresenter(View view){
+    public MainPresenter(View view) {
         this.view = view;
         followService = new FollowService();
         statusService = new StatusService();
@@ -45,31 +48,32 @@ public class MainPresenter {
         followService.unFollow(Cache.getInstance().getCurrUserAuthToken(), user, new UnFollowObserver());
     }
 
-    public void follow(User user){
+    public void follow(User user) {
         followService.follow(Cache.getInstance().getCurrUserAuthToken(), user, new followObserver());
     }
 
-    public void postStatus(String post, String dateAndTime, List<String> urls, List<String> mentions){
+    public void postStatus(String post, String dateAndTime, List<String> urls, List<String> mentions) {
         statusService.postStatus(post, Cache.getInstance().getCurrUser(), dateAndTime, urls, mentions, new PostStatusObserver());
     }
 
-    public void getFollowersCount(User user){
+    public void getFollowersCount(User user) {
         followService.getFollowersCount(Cache.getInstance().getCurrUserAuthToken(), user, new GetFollowersCountObserver());
     }
+
     public void getFollowingCount(User selectedUser) {
         followService.getFollowingCount(Cache.getInstance().getCurrUserAuthToken(), selectedUser, new GetFollowingCountObserver());
     }
 
-    public void isFollower(User user){
-        followService.isFollower(Cache.getInstance().getCurrUserAuthToken(),Cache.getInstance().getCurrUser(), user, new IsFollowerObserver());
+    public void isFollower(User user) {
+        followService.isFollower(Cache.getInstance().getCurrUserAuthToken(), Cache.getInstance().getCurrUser(), user, new IsFollowerObserver());
     }
 
-    public void logout(){
+    public void logout() {
         loginService.logout(Cache.getInstance().getCurrUserAuthToken(), new LogoutObserver());
     }
 
 
-    public class LogoutObserver implements LoginService.LogoutObserver{
+    public class LogoutObserver implements LoginService.LogoutObserver {
 
         @Override
         public void handleSuccess() {
@@ -87,7 +91,7 @@ public class MainPresenter {
         }
     }
 
-    public class GetFollowingCountObserver implements FollowService.GetFollowingCountObserver{
+    public class GetFollowingCountObserver implements FollowService.GetFollowingCountObserver {
 
         @Override
         public void handleSuccess(int count) {
@@ -104,8 +108,8 @@ public class MainPresenter {
             view.displayErrorMessage("Failed to get following count because of exception: " + exception.getMessage());
         }
     }
-    
-    public class GetFollowersCountObserver implements FollowService.GetFollowersCountObserver{
+
+    public class GetFollowersCountObserver implements FollowService.GetFollowersCountObserver {
 
         @Override
         public void handleSuccess(int count) {
@@ -123,7 +127,7 @@ public class MainPresenter {
         }
     }
 
-    public class PostStatusObserver implements StatusService.PostStatusObserver{
+    public class PostStatusObserver implements StatusService.PostStatusObserver {
 
         @Override
         public void handleSuccess() {
@@ -141,7 +145,7 @@ public class MainPresenter {
         }
     }
 
-    public class followObserver implements FollowService.FollowObserver{
+    public class followObserver implements FollowService.FollowObserver {
 
         @Override
         public void handleSuccess() {
@@ -164,7 +168,7 @@ public class MainPresenter {
         }
     }
 
-    public class UnFollowObserver implements FollowService.UnFollowObserver{
+    public class UnFollowObserver implements FollowService.UnFollowObserver {
 
         @Override
         public void handleSuccess() {
@@ -187,7 +191,7 @@ public class MainPresenter {
         }
     }
 
-    public class IsFollowerObserver implements FollowService.IsFollowerObserver{
+    public class IsFollowerObserver implements FollowService.IsFollowerObserver {
 
         @Override
         public void handleSuccess(boolean value) {
