@@ -64,6 +64,7 @@ public class StoryPresenter {
 
         void removeLoadingFooter();
 
+        void displayGettingUser();
     }
 
     public class GetStoryObserver implements StoryService.GetStoryObserver {
