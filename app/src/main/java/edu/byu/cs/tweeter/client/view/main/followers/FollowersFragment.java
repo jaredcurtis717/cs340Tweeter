@@ -46,8 +46,6 @@ public class FollowersFragment extends Fragment implements FollowersPresenter.Vi
     private static final int LOADING_DATA_VIEW = 0;
     private static final int ITEM_VIEW = 1;
 
-    private static final int PAGE_SIZE = 10;
-
     private User user;
 
     private FollowersPresenter presenter;
@@ -146,7 +144,7 @@ public class FollowersFragment extends Fragment implements FollowersPresenter.Vi
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    presenter.clickUser(Cache.getInstance().getCurrUserAuthToken(), user.getAlias());
+                    presenter.clickUser(Cache.getInstance().getCurrUserAuthToken(), userAlias.getText().toString());
                     Toast.makeText(getContext(), "Getting user's profile...", Toast.LENGTH_LONG).show();
                 }
             });
