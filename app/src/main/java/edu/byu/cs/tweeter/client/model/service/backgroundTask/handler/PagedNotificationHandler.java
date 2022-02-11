@@ -4,11 +4,9 @@ import android.os.Bundle;
 
 import java.util.List;
 
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowersTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowingTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.PagedTask;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedNotificationObserver;
-import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.client.model.service.observer.PagedNotificationObserver;
 
 public class PagedNotificationHandler<T> extends BackgroundTaskHandler<PagedNotificationObserver<T>> {
 
