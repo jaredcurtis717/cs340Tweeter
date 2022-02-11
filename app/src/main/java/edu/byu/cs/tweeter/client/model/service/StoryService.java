@@ -1,12 +1,16 @@
 package edu.byu.cs.tweeter.client.model.service;
 
+import android.os.Handler;
+import android.os.Message;
+
+import androidx.annotation.NonNull;
+
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetStoryTask;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.GetStoryHandler;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
@@ -31,4 +35,37 @@ public class StoryService {
         void setLoading(boolean value);
     }
 
+    /**
+     * Message handler (i.e., observer) for GetStoryTask.
+     */
+    private class GetStoryHandler extends Handler {
+        private final GetStoryObserver observer;
+
+        public GetStoryHandler(GetStoryObserver observer) {
+            this.observer = observer;
+        }
+
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            observer.setLoading(false);
+            observer.removeLoadingFooter();
+
+            boolean success = msg.getData().getBoolean(GetStoryTask.SUCCESS_KEY);
+            if (success) {
+                List<Status> statuses = (List<Status>) msg.getData().getSerializable(GetStoryTask.ITEMS_KEY);
+                boolean hasMorePages = msg.getData().getBoolean(GetStoryTask.MORE_PAGES_KEY);
+
+                observer.handleSuccess(statuses, hasMorePages);
+
+            } else if (msg.getData().containsKey(GetStoryTask.MESSAGE_KEY)) {
+                String message = msg.getData().getString(GetStoryTask.MESSAGE_KEY);
+                observer.handleFailure(message);
+                //Toast.makeText(getContext(), "Failed to get story: " + message, Toast.LENGTH_LONG).show();
+            } else if (msg.getData().containsKey(GetStoryTask.EXCEPTION_KEY)) {
+                Exception ex = (Exception) msg.getData().getSerializable(GetStoryTask.EXCEPTION_KEY);
+                observer.handleException(ex);
+                //Toast.makeText(getContext(), "Failed to get story because of exception: " + ex.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        }
+    }
 }
