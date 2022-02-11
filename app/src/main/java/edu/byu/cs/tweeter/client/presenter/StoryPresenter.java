@@ -70,9 +70,9 @@ public class StoryPresenter {
     public class GetStoryObserver implements StoryService.GetStoryObserver {
 
         @Override
-        public void handleSuccess(List<Status> statuses, boolean hasMorePages, Status lastStatus) {
+        public void handleSuccess(List<Status> statuses, boolean hasMorePages) {
             setHasMorePages(hasMorePages);
-            setLastStatus(lastStatus);
+            lastStatus = (statuses.size() > 0) ? statuses.get(statuses.size() - 1) : null;
             view.displayNewStatuses(statuses);
         }
 
