@@ -11,12 +11,11 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowingCountT
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowingTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.IsFollowerTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.UnfollowTask;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.GetFollowersCountHandler;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.GetFollowingCountHandler;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.GetFollowingHandler;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.CountNotificationHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.IsFollowerHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.PagedNotificationHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.SimpleNotificationHandler;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.CountNotificationObserver;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedNotificationObserver;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.SimpleNotificationObserver;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
@@ -27,7 +26,7 @@ public class FollowService {
 
     public void getFollowing(AuthToken currUserAuthToken, User user, int pageSize, User lastFollowee, GetFollowingObserver getFollowingObserver) {
         GetFollowingTask getFollowingTask = new GetFollowingTask(currUserAuthToken,
-                user, pageSize, lastFollowee, new GetFollowingHandler(getFollowingObserver));
+                user, pageSize, lastFollowee, new PagedNotificationHandler<>(getFollowingObserver));
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(getFollowingTask);
     }
@@ -54,14 +53,14 @@ public class FollowService {
 
     public void getFollowersCount(AuthToken authToken, User user, GetFollowersCountObserver getFollowersCountObserver) {
         GetFollowersCountTask followersCountTask = new GetFollowersCountTask(authToken,
-                user, new GetFollowersCountHandler(getFollowersCountObserver));
+                user, new CountNotificationHandler(getFollowersCountObserver));
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(followersCountTask);
     }
 
     public void getFollowingCount(AuthToken authToken, User user, GetFollowingCountObserver getFollowingCountObserver) {
         GetFollowingCountTask followingCountTask = new GetFollowingCountTask(authToken,
-                user, new GetFollowingCountHandler(getFollowingCountObserver));
+                user, new CountNotificationHandler(getFollowingCountObserver));
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(followingCountTask);
     }
@@ -73,12 +72,8 @@ public class FollowService {
         executor.execute(isFollowerTask);
     }
 
-    public interface GetFollowingObserver {
-        void handleSuccess(List<User> followees, boolean hasMorePages);
+    public interface GetFollowingObserver extends PagedNotificationObserver<User>{
 
-        void handleFailure(String message);
-
-        void handleException(Exception exception);
     }
 
     public interface GetFollowersObserver extends PagedNotificationObserver<User> {
@@ -93,21 +88,11 @@ public class FollowService {
         void setFollowButtonEnabled(boolean value);
     }
 
-    public interface GetFollowersCountObserver {
-        void handleSuccess(int count);
-
-        void handleFailure(String message);
-
-        void handleException(Exception exception);
+    public interface GetFollowersCountObserver extends CountNotificationObserver {
     }
 
 
-    public interface GetFollowingCountObserver {
-        void handleSuccess(int count);
-
-        void handleFailure(String message);
-
-        void handleException(Exception exception);
+    public interface GetFollowingCountObserver extends CountNotificationObserver{
     }
 
     public interface IsFollowerObserver {

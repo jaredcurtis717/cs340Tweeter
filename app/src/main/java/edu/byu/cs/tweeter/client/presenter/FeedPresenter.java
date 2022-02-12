@@ -16,6 +16,7 @@ public class FeedPresenter {
     private final View view;
     private final StatusService statusService;
     private final UserService userService;
+
     public FeedPresenter(View view) {
         this.view = view;
         statusService = new StatusService();
@@ -79,6 +80,8 @@ public class FeedPresenter {
 
         @Override
         public void handleSuccess(List<Status> statuses, boolean hasMorePages) {
+            setLoading(false);
+            removeLoadingFooter();
             lastStatus = (statuses.size() > 0) ? statuses.get(statuses.size() - 1) : null;
             setHasMorePages(hasMorePages);
             view.gotFeed(statuses);
@@ -94,12 +97,10 @@ public class FeedPresenter {
             view.displayErrorMessage("Failed to get feed because of exception: " + exception.getMessage());
         }
 
-        @Override
         public void setLoading(boolean value) {
             isLoading = value;
         }
 
-        @Override
         public void removeLoadingFooter() {
             view.removeLoadingFooterInView();
         }

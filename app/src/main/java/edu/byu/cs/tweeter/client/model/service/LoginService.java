@@ -7,15 +7,16 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.LoginTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.LogoutTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.RegisterTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.LoginHandler;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.LogoutHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.RegisterHandler;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.SimpleNotificationHandler;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.SimpleNotificationObserver;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 
 public class LoginService {
 
     public void logout(AuthToken authToken, LogoutObserver logoutObserver) {
-        LogoutTask logoutTask = new LogoutTask(authToken, new LogoutHandler(logoutObserver));
+        LogoutTask logoutTask = new LogoutTask(authToken, new SimpleNotificationHandler(logoutObserver));
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(logoutTask);
     }
@@ -35,12 +36,7 @@ public class LoginService {
         executor.execute(loginTask);
     }
 
-    public interface LogoutObserver {
-        void handleSuccess();
-
-        void handleFailure(String message);
-
-        void handleException(Exception exception);
+    public interface LogoutObserver extends SimpleNotificationObserver {
     }
 
     public interface RegisterObserver {
