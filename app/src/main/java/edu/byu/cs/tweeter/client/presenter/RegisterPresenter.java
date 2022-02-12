@@ -10,6 +10,7 @@ import java.util.Base64;
 
 import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.LoginService;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.UserEntryNotificationObserver;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 
@@ -70,7 +71,7 @@ public class RegisterPresenter {
         void registered(User user);
     }
 
-    public class RegisterObserver implements LoginService.RegisterObserver {
+    public class RegisterObserver implements UserEntryNotificationObserver {
 
         @Override
         public void handleSuccess(User registeredUser, AuthToken authToken) {

@@ -17,7 +17,7 @@ import edu.byu.cs.tweeter.model.domain.User;
 
 public class StatusService {
 
-    public void postStatus(String post, User currUser, String dateAndTime, List<String> urls, List<String> mentions, PostStatusObserver postStatusObserver) {
+    public void postStatus(String post, User currUser, String dateAndTime, List<String> urls, List<String> mentions, SimpleNotificationObserver postStatusObserver) {
         Status newStatus = new Status(post, currUser, dateAndTime, urls, mentions);
         PostStatusTask statusTask = new PostStatusTask(Cache.getInstance().getCurrUserAuthToken(),
                 newStatus, new SimpleNotificationHandler(postStatusObserver));
@@ -25,19 +25,11 @@ public class StatusService {
         executor.execute(statusTask);
     }
 
-    public void getFeed(AuthToken authToken, User user, int pageSize, Status lastStatus, GetFeedObserver getFeedObserver) {
+    public void getFeed(AuthToken authToken, User user, int pageSize, Status lastStatus, PagedNotificationObserver<Status> getFeedObserver) {
         GetFeedTask getFeedTask = new GetFeedTask(authToken,
                 user, pageSize, lastStatus, new PagedNotificationHandler<Status>(getFeedObserver));
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(getFeedTask);
-    }
-
-    public interface PostStatusObserver extends SimpleNotificationObserver {
-    }
-
-
-    public interface GetFeedObserver extends PagedNotificationObserver<Status> {
-
     }
 
 }

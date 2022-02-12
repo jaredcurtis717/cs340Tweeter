@@ -6,6 +6,9 @@ import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.FollowService;
 import edu.byu.cs.tweeter.client.model.service.LoginService;
 import edu.byu.cs.tweeter.client.model.service.StatusService;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.CountNotificationObserver;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.IsFollowerNotificationObserver;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.SimpleNotificationObserver;
 import edu.byu.cs.tweeter.model.domain.User;
 
 public class MainPresenter {
@@ -70,7 +73,7 @@ public class MainPresenter {
     }
 
 
-    public class LogoutObserver implements LoginService.LogoutObserver {
+    public class LogoutObserver implements SimpleNotificationObserver {
 
         @Override
         public void handleSuccess() {
@@ -88,7 +91,7 @@ public class MainPresenter {
         }
     }
 
-    public class GetFollowingCountObserver implements FollowService.GetFollowingCountObserver {
+    public class GetFollowingCountObserver implements CountNotificationObserver{
 
         @Override
         public void handleSuccess(int count) {
@@ -106,7 +109,7 @@ public class MainPresenter {
         }
     }
 
-    public class GetFollowersCountObserver implements FollowService.GetFollowersCountObserver {
+    public class GetFollowersCountObserver implements CountNotificationObserver {
 
         @Override
         public void handleSuccess(int count) {
@@ -124,7 +127,7 @@ public class MainPresenter {
         }
     }
 
-    public class PostStatusObserver implements StatusService.PostStatusObserver {
+    public class PostStatusObserver implements SimpleNotificationObserver {
 
         @Override
         public void handleSuccess() {
@@ -142,7 +145,7 @@ public class MainPresenter {
         }
     }
 
-    public class followObserver implements FollowService.FollowObserver {
+    public class followObserver implements SimpleNotificationObserver {
 
         @Override
         public void handleSuccess() {
@@ -159,13 +162,9 @@ public class MainPresenter {
             view.displayErrorMessage("Failed to follow because of exception: " + exception.getMessage());
         }
 
-        @Override
-        public void setFollowButtonEnabled(boolean value) {
-            view.setFollowButtonEnabled(value);
-        }
     }
 
-    public class UnFollowObserver implements FollowService.UnFollowObserver {
+    public class UnFollowObserver implements SimpleNotificationObserver {
 
         @Override
         public void handleSuccess() {
@@ -182,13 +181,9 @@ public class MainPresenter {
             view.displayErrorMessage("Failed to unfollow because of exception: " + exception.getMessage());
         }
 
-        @Override
-        public void setFollowButtonEnabled(boolean value) {
-            view.setFollowButtonEnabled(value);
-        }
     }
 
-    public class IsFollowerObserver implements FollowService.IsFollowerObserver {
+    public class IsFollowerObserver implements IsFollowerNotificationObserver {
 
         @Override
         public void handleSuccess(boolean value) {

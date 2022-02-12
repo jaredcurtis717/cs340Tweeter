@@ -4,6 +4,7 @@ import android.widget.EditText;
 
 import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.LoginService;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.UserEntryNotificationObserver;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 
@@ -38,7 +39,7 @@ public class LoginPresenter {
         void loggedIn(User user);
     }
 
-    private class LoginObserver implements LoginService.LoginObserver {
+    private class LoginObserver implements UserEntryNotificationObserver {
 
         @Override
         public void handleSuccess(User loggedInUser, AuthToken authToken) {

@@ -24,78 +24,53 @@ import edu.byu.cs.tweeter.model.domain.User;
 public class FollowService {
 
 
-    public void getFollowing(AuthToken currUserAuthToken, User user, int pageSize, User lastFollowee, GetFollowingObserver getFollowingObserver) {
+    public void getFollowing(AuthToken currUserAuthToken, User user, int pageSize, User lastFollowee, PagedNotificationObserver<User> getFollowingObserver) {
         GetFollowingTask getFollowingTask = new GetFollowingTask(currUserAuthToken,
                 user, pageSize, lastFollowee, new PagedNotificationHandler<>(getFollowingObserver));
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(getFollowingTask);
     }
 
-    public void getFollowers(AuthToken currUserAuthToken, User user, int pageSize, User lastFollower, GetFollowersObserver getFollowersObserver) {
+    public void getFollowers(AuthToken currUserAuthToken, User user, int pageSize, User lastFollower, PagedNotificationObserver<User> getFollowersObserver) {
         GetFollowersTask getFollowersTask = new GetFollowersTask(currUserAuthToken,
                 user, pageSize, lastFollower, new PagedNotificationHandler<>(getFollowersObserver));
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(getFollowersTask);
     }
 
-    public void follow(AuthToken currUserAuthToken, User user, FollowObserver followObserver) {
+    public void follow(AuthToken currUserAuthToken, User user, SimpleNotificationObserver followObserver) {
         FollowTask followTask = new FollowTask(currUserAuthToken, user, new SimpleNotificationHandler(followObserver));
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(followTask);
     }
 
-    public void unFollow(AuthToken authToken, User user, UnFollowObserver unFollowObserver) {
+    public void unFollow(AuthToken authToken, User user, SimpleNotificationObserver unFollowObserver) {
         UnfollowTask unfollowTask = new UnfollowTask(authToken,
                 user, new SimpleNotificationHandler(unFollowObserver));
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(unfollowTask);
     }
 
-    public void getFollowersCount(AuthToken authToken, User user, GetFollowersCountObserver getFollowersCountObserver) {
+    public void getFollowersCount(AuthToken authToken, User user, CountNotificationObserver getFollowersCountObserver) {
         GetFollowersCountTask followersCountTask = new GetFollowersCountTask(authToken,
                 user, new CountNotificationHandler(getFollowersCountObserver));
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(followersCountTask);
     }
 
-    public void getFollowingCount(AuthToken authToken, User user, GetFollowingCountObserver getFollowingCountObserver) {
+    public void getFollowingCount(AuthToken authToken, User user, CountNotificationObserver getFollowingCountObserver) {
         GetFollowingCountTask followingCountTask = new GetFollowingCountTask(authToken,
                 user, new CountNotificationHandler(getFollowingCountObserver));
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(followingCountTask);
     }
 
-    public void isFollower(AuthToken authToken, User currUser, User selectedUser, IsFollowerObserver isFollowerObserver) {
+    public void isFollower(AuthToken authToken, User currUser, User selectedUser, IsFollowerNotificationObserver isFollowerObserver) {
         IsFollowerTask isFollowerTask = new IsFollowerTask(authToken,
                 currUser, selectedUser, new IsFollowerNotificationHandler(isFollowerObserver));
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(isFollowerTask);
     }
-
-    public interface GetFollowingObserver extends PagedNotificationObserver<User> {
-
-    }
-
-    public interface GetFollowersObserver extends PagedNotificationObserver<User> {
-    }
-
-
-    public interface FollowObserver extends SimpleNotificationObserver {
-        void setFollowButtonEnabled(boolean value);
-    }
-
-    public interface UnFollowObserver extends SimpleNotificationObserver {
-        void setFollowButtonEnabled(boolean value);
-    }
-
-    public interface GetFollowersCountObserver extends CountNotificationObserver {
-    }
-
-
-    public interface GetFollowingCountObserver extends CountNotificationObserver {
-    }
-
-    public interface IsFollowerObserver extends IsFollowerNotificationObserver {
-    }
+    
 
 }

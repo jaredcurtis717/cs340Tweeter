@@ -14,13 +14,13 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 
 public class LoginService {
 
-    public void logout(AuthToken authToken, LogoutObserver logoutObserver) {
+    public void logout(AuthToken authToken, SimpleNotificationObserver logoutObserver) {
         LogoutTask logoutTask = new LogoutTask(authToken, new SimpleNotificationHandler(logoutObserver));
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(logoutTask);
     }
 
-    public void register(String firstName, String lastName, String alias, String password, String image, RegisterObserver registerObserver) {
+    public void register(String firstName, String lastName, String alias, String password, String image, UserEntryNotificationObserver registerObserver) {
         // Send register request.
         RegisterTask registerTask = new RegisterTask(firstName, lastName,
                 alias, password, image, new UserEntryNotificationHandler(registerObserver));
@@ -29,21 +29,10 @@ public class LoginService {
         executor.execute(registerTask);
     }
 
-    public void login(String alias, String password, LoginObserver loginObserver) {
+    public void login(String alias, String password, UserEntryNotificationObserver loginObserver) {
         LoginTask loginTask = new LoginTask(alias, password, new UserEntryNotificationHandler(loginObserver));
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(loginTask);
-    }
-
-    public interface LogoutObserver extends SimpleNotificationObserver {
-    }
-
-    public interface RegisterObserver extends UserEntryNotificationObserver {
-
-    }
-
-    public interface LoginObserver extends UserEntryNotificationObserver {
-
     }
 
 }
