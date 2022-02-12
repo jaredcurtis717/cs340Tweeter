@@ -4,9 +4,8 @@ import android.os.Bundle;
 
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetCountTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.CountNotificationObserver;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.ServiceObserver;
 
-public class CountNotificationHandler extends BackgroundTaskHandler<CountNotificationObserver>{
+public class CountNotificationHandler extends BackgroundTaskHandler<CountNotificationObserver> {
 
     public CountNotificationHandler(CountNotificationObserver observer) {
         super(observer);

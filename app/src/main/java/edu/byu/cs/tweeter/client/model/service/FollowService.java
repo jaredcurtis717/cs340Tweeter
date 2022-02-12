@@ -1,6 +1,5 @@
 package edu.byu.cs.tweeter.client.model.service;
 
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -12,10 +11,11 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowingTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.IsFollowerTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.UnfollowTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.CountNotificationHandler;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.IsFollowerHandler;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.IsFollowerNotificationHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.PagedNotificationHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.SimpleNotificationHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.CountNotificationObserver;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.IsFollowerNotificationObserver;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedNotificationObserver;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.SimpleNotificationObserver;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
@@ -67,12 +67,12 @@ public class FollowService {
 
     public void isFollower(AuthToken authToken, User currUser, User selectedUser, IsFollowerObserver isFollowerObserver) {
         IsFollowerTask isFollowerTask = new IsFollowerTask(authToken,
-                currUser, selectedUser, new IsFollowerHandler(isFollowerObserver));
+                currUser, selectedUser, new IsFollowerNotificationHandler(isFollowerObserver));
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(isFollowerTask);
     }
 
-    public interface GetFollowingObserver extends PagedNotificationObserver<User>{
+    public interface GetFollowingObserver extends PagedNotificationObserver<User> {
 
     }
 
@@ -84,7 +84,7 @@ public class FollowService {
         void setFollowButtonEnabled(boolean value);
     }
 
-    public interface UnFollowObserver extends SimpleNotificationObserver{
+    public interface UnFollowObserver extends SimpleNotificationObserver {
         void setFollowButtonEnabled(boolean value);
     }
 
@@ -92,15 +92,10 @@ public class FollowService {
     }
 
 
-    public interface GetFollowingCountObserver extends CountNotificationObserver{
+    public interface GetFollowingCountObserver extends CountNotificationObserver {
     }
 
-    public interface IsFollowerObserver {
-        void handleSuccess(boolean value);
-
-        void handleFailure(String message);
-
-        void handleException(Exception exception);
+    public interface IsFollowerObserver extends IsFollowerNotificationObserver {
     }
 
 }

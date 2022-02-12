@@ -43,7 +43,7 @@ public abstract class BackgroundTask implements Runnable {
 
     /**
      * Called by a Task's runTask method when it is successful.
-     *
+     * <p>
      * This method is public to make it accessible to test cases
      */
     public void sendSuccessMessage() {
@@ -55,7 +55,7 @@ public abstract class BackgroundTask implements Runnable {
 
     /**
      * Called by a Task's runTask method when it is not successful.
-     *
+     * <p>
      * This method is public to make it accessible to test cases
      */
     public void sendFailedMessage(String errorMessage) {
@@ -67,7 +67,7 @@ public abstract class BackgroundTask implements Runnable {
 
     /**
      * Called by a Task's runTask method when an exception occurs.
-     *
+     * <p>
      * This method is public to make it accessible to test cases
      */
     public void sendExceptionMessage(Exception exception) {
@@ -79,6 +79,7 @@ public abstract class BackgroundTask implements Runnable {
 
     /**
      * Add additional information during a successful task to a Bundle
+     *
      * @param msgBundle The bundle send to the handler with the results of the task
      */
     protected void loadSuccessBundle(Bundle msgBundle) {

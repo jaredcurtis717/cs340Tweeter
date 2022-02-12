@@ -10,6 +10,7 @@ import edu.byu.cs.tweeter.model.domain.User;
 public class LoginPresenter {
     private final View view;
     private final LoginService loginService;
+
     public LoginPresenter(View view) {
         this.view = view;
         loginService = new LoginService();

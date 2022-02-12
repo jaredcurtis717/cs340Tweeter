@@ -16,6 +16,7 @@ public class FollowersPresenter {
     private User lastFollower;
     private final UserService userService;
     private final FollowService followService;
+
     public FollowersPresenter(View view) {
         this.view = view;
         userService = new UserService();

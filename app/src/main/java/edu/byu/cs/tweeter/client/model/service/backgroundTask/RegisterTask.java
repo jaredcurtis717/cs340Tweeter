@@ -15,7 +15,7 @@ public class RegisterTask extends AuthenticateTask {
      * The user's first name.
      */
     private final String firstName;
-    
+
     /**
      * The user's last name.
      */

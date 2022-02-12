@@ -16,6 +16,7 @@ public class FollowingPresenter {
     private User lastFollowee;
     private boolean hasMorePages;
     private boolean isLoading = false;
+
     public FollowingPresenter(View view) {
         this.view = view;
         followService = new FollowService();

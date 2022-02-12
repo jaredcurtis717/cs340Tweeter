@@ -6,12 +6,11 @@ import java.util.concurrent.Executors;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.LoginTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.LogoutTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.RegisterTask;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.LoginHandler;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.RegisterHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.SimpleNotificationHandler;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.UserEntryNotificationHandler;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.SimpleNotificationObserver;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.UserEntryNotificationObserver;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
-import edu.byu.cs.tweeter.model.domain.User;
 
 public class LoginService {
 
@@ -24,14 +23,14 @@ public class LoginService {
     public void register(String firstName, String lastName, String alias, String password, String image, RegisterObserver registerObserver) {
         // Send register request.
         RegisterTask registerTask = new RegisterTask(firstName, lastName,
-                alias, password, image, new RegisterHandler(registerObserver));
+                alias, password, image, new UserEntryNotificationHandler(registerObserver));
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(registerTask);
     }
 
     public void login(String alias, String password, LoginObserver loginObserver) {
-        LoginTask loginTask = new LoginTask(alias, password, new LoginHandler(loginObserver));
+        LoginTask loginTask = new LoginTask(alias, password, new UserEntryNotificationHandler(loginObserver));
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(loginTask);
     }
@@ -39,20 +38,12 @@ public class LoginService {
     public interface LogoutObserver extends SimpleNotificationObserver {
     }
 
-    public interface RegisterObserver {
-        void handleSuccess(User user, AuthToken authToken);
+    public interface RegisterObserver extends UserEntryNotificationObserver {
 
-        void handleFailure(String message);
-
-        void handleException(Exception exception);
     }
 
-    public interface LoginObserver {
-        void handleSuccess(User user, AuthToken authToken);
+    public interface LoginObserver extends UserEntryNotificationObserver {
 
-        void handleFailure(String message);
-
-        void handleException(Exception exception);
     }
 
 }

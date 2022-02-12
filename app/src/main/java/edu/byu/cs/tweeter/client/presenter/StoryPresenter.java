@@ -17,6 +17,7 @@ public class StoryPresenter {
     Status lastStatus;
     private boolean isLoading;
     private boolean hasMorePages;
+
     public StoryPresenter(View view) {
         this.view = view;
         userService = new UserService();
