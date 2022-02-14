@@ -6,7 +6,7 @@ import java.util.concurrent.Executors;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.BackgroundTask;
 
 public abstract class Service {
-    protected void runTask(BackgroundTask task){
+    protected void runTask(BackgroundTask task) {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(task);
     }

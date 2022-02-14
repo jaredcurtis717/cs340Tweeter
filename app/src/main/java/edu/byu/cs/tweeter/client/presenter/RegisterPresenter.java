@@ -10,7 +10,7 @@ import java.util.Base64;
 
 import edu.byu.cs.tweeter.client.model.service.LoginService;
 
-public class RegisterPresenter extends UserPresenter{
+public class RegisterPresenter extends UserPresenter {
     private final LoginService loginService;
 
     public RegisterPresenter(UserPresenter.View view) {

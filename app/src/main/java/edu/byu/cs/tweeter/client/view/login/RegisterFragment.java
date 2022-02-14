@@ -59,7 +59,6 @@ public class RegisterFragment extends Fragment implements RegisterPresenter.View
     }
 
 
-
     @Override
     public void displayValidationError(String message) {
         validationToast = Toast.makeText(getContext(), message, Toast.LENGTH_LONG);

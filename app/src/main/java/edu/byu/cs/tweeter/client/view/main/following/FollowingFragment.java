@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.byu.cs.client.R;
-import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.presenter.FollowingPresenter;
 import edu.byu.cs.tweeter.client.view.main.MainActivity;
 import edu.byu.cs.tweeter.model.domain.User;
@@ -82,7 +81,7 @@ public class FollowingFragment extends Fragment implements FollowingPresenter.Vi
 
         presenter = new FollowingPresenter(this);
 
-        presenter.loadMoreItems(user);
+        presenter.loadItems(user);
         return view;
     }
 
@@ -137,7 +136,7 @@ public class FollowingFragment extends Fragment implements FollowingPresenter.Vi
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    presenter.clickFollower(Cache.getInstance().getCurrUserAuthToken(), userAlias.getText().toString());
+                    presenter.clickItem(userAlias.getText().toString());
 
                     Toast.makeText(getContext(), "Getting user's profile...", Toast.LENGTH_LONG).show();
                 }
@@ -267,7 +266,7 @@ public class FollowingFragment extends Fragment implements FollowingPresenter.Vi
          * data.
          */
         void loadMoreItems() {
-            presenter.loadMoreItems(user);
+            presenter.loadItems(user);
         }
 
         /**
@@ -323,7 +322,7 @@ public class FollowingFragment extends Fragment implements FollowingPresenter.Vi
             int totalItemCount = layoutManager.getItemCount();
             int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
 
-            if (!presenter.isLoading() && presenter.isHasMorePages()) {
+            if (!presenter.isLoading() && presenter.getHasMorePages()) {
                 if ((visibleItemCount + firstVisibleItemPosition) >=
                         totalItemCount && firstVisibleItemPosition >= 0) {
                     // Run this code later on the UI thread

@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.byu.cs.client.R;
-import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.presenter.StoryPresenter;
 import edu.byu.cs.tweeter.client.view.main.MainActivity;
 import edu.byu.cs.tweeter.model.domain.Status;
@@ -96,10 +95,9 @@ public class StoryFragment extends Fragment implements StoryPresenter.View {
 
     @Override
     public void setLoadingStatus(boolean value) {
-        if (value){
+        if (value) {
             storyRecyclerViewAdapter.addLoadingFooter();
-        }
-        else{
+        } else {
             storyRecyclerViewAdapter.removeLoadingFooter();
         }
     }
@@ -149,7 +147,7 @@ public class StoryFragment extends Fragment implements StoryPresenter.View {
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    storyPresenter.clickUser(Cache.getInstance().getCurrUserAuthToken(), userAlias.getText().toString());
+                    storyPresenter.clickItem(userAlias.getText().toString());
                 }
             });
         }
@@ -185,7 +183,7 @@ public class StoryFragment extends Fragment implements StoryPresenter.View {
                             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(clickable));
                             startActivity(intent);
                         } else {
-                            storyPresenter.clickUser(Cache.getInstance().getCurrUserAuthToken(), clickable);
+                            storyPresenter.clickItem(clickable);
                             //Toast.makeText(getContext(), "Getting user's profile...", Toast.LENGTH_LONG).show();
                         }
                     }
@@ -290,7 +288,7 @@ public class StoryFragment extends Fragment implements StoryPresenter.View {
          */
         @Override
         public void onBindViewHolder(@NonNull StoryHolder storyHolder, int position) {
-            if (!storyPresenter.getIsLoading()) {
+            if (!storyPresenter.isLoading()) {
                 storyHolder.bindStatus(story.get(position));
             }
         }
@@ -314,7 +312,7 @@ public class StoryFragment extends Fragment implements StoryPresenter.View {
          */
         @Override
         public int getItemViewType(int position) {
-            return (position == story.size() - 1 && storyPresenter.getIsLoading()) ? LOADING_DATA_VIEW : ITEM_VIEW;
+            return (position == story.size() - 1 && storyPresenter.isLoading()) ? LOADING_DATA_VIEW : ITEM_VIEW;
         }
 
         /**
@@ -382,7 +380,7 @@ public class StoryFragment extends Fragment implements StoryPresenter.View {
             int totalItemCount = layoutManager.getItemCount();
             int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
 
-            if (!storyPresenter.getIsLoading() && storyPresenter.getHasMorePages()) {
+            if (!storyPresenter.isLoading() && storyPresenter.getHasMorePages()) {
                 if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount && firstVisibleItemPosition >= 0) {
                     // Run this code later on the UI thread
                     final Handler handler = new Handler(Looper.getMainLooper());

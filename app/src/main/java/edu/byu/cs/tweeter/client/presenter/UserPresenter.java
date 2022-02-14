@@ -5,15 +5,13 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.UserEntry
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 
-public abstract class UserPresenter extends Presenter<UserPresenter.View>{
+public abstract class UserPresenter extends Presenter<UserPresenter.View> {
 
-    public UserPresenter(View view){
+    public UserPresenter(View view) {
         super(view);
     }
 
     public interface View extends Presenter.View {
-        void displayValidationError(String message);
-        void clearValidationError();
         void navigateToUser(User user);
     }
 

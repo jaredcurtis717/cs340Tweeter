@@ -11,10 +11,8 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.IsFollowe
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.SimpleNotificationObserver;
 import edu.byu.cs.tweeter.model.domain.User;
 
-public class MainPresenter {
-    public interface View {
-        void displayErrorMessage(String message);
-
+public class MainPresenter extends Presenter<MainPresenter.View>{
+    public interface View extends Presenter.View{
         void followSuccessful();
 
         void unFollowSuccessful();
@@ -38,7 +36,7 @@ public class MainPresenter {
     private LoginService loginService;
 
     public MainPresenter(View view) {
-        this.view = view;
+        super(view);
         followService = new FollowService();
         statusService = new StatusService();
         loginService = new LoginService();
@@ -91,7 +89,7 @@ public class MainPresenter {
         }
     }
 
-    public class GetFollowingCountObserver implements CountNotificationObserver{
+    public class GetFollowingCountObserver implements CountNotificationObserver {
 
         @Override
         public void handleSuccess(int count) {

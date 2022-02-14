@@ -88,7 +88,7 @@ public class FeedFragment extends Fragment implements FeedPresenter.View {
         feedRecyclerView.addOnScrollListener(new FeedRecyclerViewPaginationScrollListener(layoutManager));
 
         presenter = new FeedPresenter(this);
-        presenter.getFeed(user);
+        presenter.loadItems(user);
 
         return view;
     }
@@ -99,14 +99,11 @@ public class FeedFragment extends Fragment implements FeedPresenter.View {
     }
 
 
-
-
     @Override
     public void setLoadingStatus(boolean value) {
-        if (value){
+        if (value) {
             feedRecyclerViewAdapter.addLoadingFooter();
-        }
-        else{
+        } else {
             feedRecyclerViewAdapter.removeLoadingFooter();
         }
     }
@@ -151,7 +148,7 @@ public class FeedFragment extends Fragment implements FeedPresenter.View {
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    presenter.getUser(userAlias.getText().toString());
+                    presenter.clickItem(userAlias.getText().toString());
                     Toast.makeText(getContext(), "Getting user's profile...", Toast.LENGTH_LONG).show();
                 }
             });
@@ -187,7 +184,7 @@ public class FeedFragment extends Fragment implements FeedPresenter.View {
                             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(clickable));
                             startActivity(intent);
                         } else {
-                            presenter.getUser(clickable);
+                            presenter.clickItem(clickable);
                             Toast.makeText(getContext(), "Getting user's profile...", Toast.LENGTH_LONG).show();
                         }
                     }
@@ -323,7 +320,7 @@ public class FeedFragment extends Fragment implements FeedPresenter.View {
          */
         void loadMoreItems() {
             if (!presenter.isLoading()) {   // This guard is important for avoiding a race condition in the scrolling code.
-                presenter.getFeed(user);
+                presenter.loadItems(user);
             }
         }
 
