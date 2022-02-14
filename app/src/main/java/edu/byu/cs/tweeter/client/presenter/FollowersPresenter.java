@@ -10,17 +10,16 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedNoti
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 
-public class FollowersPresenter {
+public class FollowersPresenter extends PagedPresenter{
     private static final int PAGE_SIZE = 10;
-    private final View view;
     private boolean isLoading = false;
     private boolean hasMorePages;
     private User lastFollower;
     private final UserService userService;
     private final FollowService followService;
 
-    public FollowersPresenter(View view) {
-        this.view = view;
+    public FollowersPresenter(PagedPresenter.View view) {
+        super(view);
         userService = new UserService();
         followService = new FollowService();
     }
@@ -62,16 +61,6 @@ public class FollowersPresenter {
         userService.getUser(authToken, userAlias, new GetUserObserver());
     }
 
-    public interface View {
-        void displayErrorMessage(String message);
-
-        void setLoadingStatus(boolean value);
-
-        void clickedUser(User user);
-
-        void addFollowers(List<User> followers);
-    }
-
     public class GetUserObserver implements GetUserNotificationObserver {
 
         @Override
@@ -98,7 +87,7 @@ public class FollowersPresenter {
             view.setLoadingStatus(false);
             lastFollower = (followers.size() > 0) ? followers.get(followers.size() - 1) : null;
             setHasMorePages(hasMorePages);
-            view.addFollowers(followers);
+            view.addItems(followers);
         }
 
         @Override

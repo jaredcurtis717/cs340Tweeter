@@ -11,17 +11,16 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 
-public class StoryPresenter {
+public class StoryPresenter extends PagedPresenter{
     private static final int PAGE_SIZE = 10;
     UserService userService;
     StoryService storyService;
-    View view;
     Status lastStatus;
     private boolean isLoading;
     private boolean hasMorePages;
 
-    public StoryPresenter(View view) {
-        this.view = view;
+    public StoryPresenter(PagedPresenter.View<Status> view) {
+        super(view);
         userService = new UserService();
         storyService = new StoryService();
         isLoading = false;
@@ -34,15 +33,11 @@ public class StoryPresenter {
     public void loadItems(User user) {
         if (!isLoading) {   // This guard is important for avoiding a race condition in the scrolling code.
             isLoading = true;
-            view.addLoadingFooter();
+            view.setLoadingStatus(true);
 
             storyService.getStory(Cache.getInstance().getCurrUserAuthToken(), user, PAGE_SIZE, lastStatus, new GetStoryObserver());
 
         }
-    }
-
-    public void setLastStatus(Status status) {
-        lastStatus = status;
     }
 
     public boolean getHasMorePages() {
@@ -57,19 +52,6 @@ public class StoryPresenter {
         return isLoading;
     }
 
-    public interface View {
-        void displayNewStatuses(List<Status> statuses);
-
-        void clickedUser(User user);
-
-        void displayErrorMessage(String s);
-
-        void addLoadingFooter();
-
-        void removeLoadingFooter();
-
-        void displayGettingUser();
-    }
 
     public class GetStoryObserver implements PagedNotificationObserver<Status> {
 
@@ -79,22 +61,22 @@ public class StoryPresenter {
             lastStatus = (statuses.size() > 0) ? statuses.get(statuses.size() - 1) : null;
 
             isLoading = false;
-            view.removeLoadingFooter();
+            view.setLoadingStatus(false);
 
-            view.displayNewStatuses(statuses);
+            view.addItems(statuses);
         }
 
         @Override
         public void handleFailure(String message) {
             isLoading = false;
-            view.removeLoadingFooter();
+            view.setLoadingStatus(false);
             view.displayErrorMessage("Failed to get story: " + message);
         }
 
         @Override
         public void handleException(Exception exception) {
             isLoading = false;
-            view.removeLoadingFooter();
+            view.setLoadingStatus(false);
             view.displayErrorMessage("Failed to get story because of exception: " + exception.getMessage());
         }
     }

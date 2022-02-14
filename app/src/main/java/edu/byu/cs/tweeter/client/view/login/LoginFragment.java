@@ -28,6 +28,7 @@ public class LoginFragment extends Fragment implements LoginPresenter.View {
     private EditText alias;
     private EditText password;
     private TextView errorView;
+    private Toast validationToast;
 
     private LoginPresenter presenter;
 
@@ -82,7 +83,18 @@ public class LoginFragment extends Fragment implements LoginPresenter.View {
     }
 
     @Override
-    public void loggedIn(User loggedInUser) {
+    public void displayValidationError(String message) {
+        validationToast = Toast.makeText(getContext(), message, Toast.LENGTH_LONG);
+        validationToast.show();
+    }
+
+    @Override
+    public void clearValidationError() {
+        validationToast.cancel();
+    }
+
+    @Override
+    public void navigateToUser(User loggedInUser) {
         Intent intent = new Intent(getContext(), MainActivity.class);
         intent.putExtra(MainActivity.CURRENT_USER_KEY, loggedInUser);
 

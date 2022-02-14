@@ -8,17 +8,21 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.UserEntry
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 
-public class LoginPresenter {
-    private final View view;
+public class LoginPresenter extends UserPresenter{
     private final LoginService loginService;
 
-    public LoginPresenter(View view) {
-        this.view = view;
+    public LoginPresenter(UserPresenter.View view) {
+        super(view);
         loginService = new LoginService();
     }
 
+    @Override
+    String getDescription() {
+        return "login";
+    }
+
     public void login(EditText alias, EditText password) {
-        loginService.login(alias.getText().toString(), password.getText().toString(), new LoginObserver());
+        loginService.login(alias.getText().toString(), password.getText().toString(), new UserObserver());
     }
 
     public void validateLogin(EditText alias, EditText password) throws IllegalArgumentException {
@@ -33,30 +37,4 @@ public class LoginPresenter {
         }
     }
 
-    public interface View {
-        void displayErrorMessage(String message);
-
-        void loggedIn(User user);
-    }
-
-    private class LoginObserver implements UserEntryNotificationObserver {
-
-        @Override
-        public void handleSuccess(User loggedInUser, AuthToken authToken) {
-            // Cache user session information
-            Cache.getInstance().setCurrUser(loggedInUser);
-            Cache.getInstance().setCurrUserAuthToken(authToken);
-            view.loggedIn(loggedInUser);
-        }
-
-        @Override
-        public void handleFailure(String message) {
-            view.displayErrorMessage("Failed to login: " + message);
-        }
-
-        @Override
-        public void handleException(Exception exception) {
-            view.displayErrorMessage("Failed to login because of exception: " + exception.getMessage());
-        }
-    }
 }

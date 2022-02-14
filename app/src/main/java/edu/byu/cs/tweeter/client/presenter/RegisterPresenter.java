@@ -8,19 +8,19 @@ import android.widget.ImageView;
 import java.io.ByteArrayOutputStream;
 import java.util.Base64;
 
-import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.LoginService;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.UserEntryNotificationObserver;
-import edu.byu.cs.tweeter.model.domain.AuthToken;
-import edu.byu.cs.tweeter.model.domain.User;
 
-public class RegisterPresenter {
-    private final View view;
+public class RegisterPresenter extends UserPresenter{
     private final LoginService loginService;
 
-    public RegisterPresenter(View view) {
-        this.view = view;
+    public RegisterPresenter(UserPresenter.View view) {
+        super(view);
         loginService = new LoginService();
+    }
+
+    @Override
+    String getDescription() {
+        return "login";
     }
 
     public String imageViewToString(ImageView imageToUpload) {
@@ -62,32 +62,8 @@ public class RegisterPresenter {
 
     public void register(EditText firstName, EditText lastName, EditText alias, EditText password, String imageBytesBase64) {
         loginService.register(firstName.getText().toString(), lastName.getText().toString(),
-                alias.getText().toString(), password.getText().toString(), imageBytesBase64, new RegisterObserver());
+                alias.getText().toString(), password.getText().toString(), imageBytesBase64, new UserObserver());
     }
 
-    public interface View {
-        void displayErrorMessage(String message);
 
-        void registered(User user);
-    }
-
-    public class RegisterObserver implements UserEntryNotificationObserver {
-
-        @Override
-        public void handleSuccess(User registeredUser, AuthToken authToken) {
-            Cache.getInstance().setCurrUser(registeredUser);
-            Cache.getInstance().setCurrUserAuthToken(authToken);
-            view.registered(registeredUser);
-        }
-
-        @Override
-        public void handleFailure(String message) {
-            view.displayErrorMessage("Failed to register: " + message);
-        }
-
-        @Override
-        public void handleException(Exception exception) {
-            view.displayErrorMessage("Failed to register because of exception: " + exception.getMessage());
-        }
-    }
 }

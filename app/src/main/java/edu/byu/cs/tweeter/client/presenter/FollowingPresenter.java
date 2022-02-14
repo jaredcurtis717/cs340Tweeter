@@ -10,17 +10,16 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedNoti
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 
-public class FollowingPresenter {
+public class FollowingPresenter extends PagedPresenter{
     private static final int PAGE_SIZE = 10;
-    private final View view;
     private final FollowService followService;
     private final UserService userService;
     private User lastFollowee;
     private boolean hasMorePages;
     private boolean isLoading = false;
 
-    public FollowingPresenter(View view) {
-        this.view = view;
+    public FollowingPresenter(PagedPresenter.View view) {
+        super(view);
         followService = new FollowService();
         userService = new UserService();
     }
@@ -41,10 +40,6 @@ public class FollowingPresenter {
         return isLoading;
     }
 
-    public void setLoading(boolean loading) {
-        isLoading = loading;
-    }
-
     public void loadMoreItems(User user) {
 
         if (!isLoading) {   // This guard is important for avoiding a race condition in the scrolling code.
@@ -55,16 +50,6 @@ public class FollowingPresenter {
         }
     }
 
-    public interface View {
-        void displayErrorMessage(String message);
-
-        void setLoadingStatus(boolean value);
-
-        void addFollowees(List<User> followees);
-
-        void clickedUser(User user);
-    }
-
     public class GetFollowingObserver implements PagedNotificationObserver<User> {
 
         @Override
@@ -73,8 +58,7 @@ public class FollowingPresenter {
             view.setLoadingStatus(false);
             lastFollowee = (followees.size() > 0) ? followees.get(followees.size() - 1) : null;
             setHasMorePages(hasMorePages);
-            view.addFollowees(followees);
-
+            view.addItems(followees);
         }
 
         @Override

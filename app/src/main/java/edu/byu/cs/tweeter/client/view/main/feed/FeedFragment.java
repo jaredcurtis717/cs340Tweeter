@@ -94,30 +94,33 @@ public class FeedFragment extends Fragment implements FeedPresenter.View {
     }
 
     @Override
-    public void gotFeed(List<Status> statuses) {
-        feedRecyclerViewAdapter.addItems(statuses);
-    }
-
-    @Override
-    public void removeLoadingFooterInView() {
-        feedRecyclerViewAdapter.removeLoadingFooter();
-    }
-
-    @Override
     public void displayErrorMessage(String message) {
         Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
     }
 
+
+
+
     @Override
-    public void addLoadingFooter() {
-        feedRecyclerViewAdapter.addLoadingFooter();
+    public void setLoadingStatus(boolean value) {
+        if (value){
+            feedRecyclerViewAdapter.addLoadingFooter();
+        }
+        else{
+            feedRecyclerViewAdapter.removeLoadingFooter();
+        }
     }
 
     @Override
-    public void gotUser(User user) {
+    public void clickedUser(User user) {
         Intent intent = new Intent(getContext(), MainActivity.class);
         intent.putExtra(MainActivity.CURRENT_USER_KEY, user);
         startActivity(intent);
+    }
+
+    @Override
+    public void addItems(List items) {
+        feedRecyclerViewAdapter.addItems(items);
     }
 
     /**

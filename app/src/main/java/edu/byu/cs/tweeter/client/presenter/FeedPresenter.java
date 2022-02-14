@@ -10,17 +10,16 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedNoti
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 
-public class FeedPresenter {
+public class FeedPresenter extends PagedPresenter{
     private static final int PAGE_SIZE = 10;
     private boolean isLoading;
     private boolean hasMorePages;
     private Status lastStatus;
-    private final View view;
     private final StatusService statusService;
     private final UserService userService;
 
     public FeedPresenter(View view) {
-        this.view = view;
+        super(view);
         statusService = new StatusService();
         userService = new UserService();
         isLoading = false;
@@ -40,7 +39,7 @@ public class FeedPresenter {
 
     public void getFeed(User user) {
         isLoading = true;
-        view.addLoadingFooter();
+        view.setLoadingStatus(true);
         statusService.getFeed(Cache.getInstance().getCurrUserAuthToken(), user, PAGE_SIZE, lastStatus, new GetFeedObserver());
     }
 
@@ -48,23 +47,12 @@ public class FeedPresenter {
         userService.getUser(Cache.getInstance().getCurrUserAuthToken(), user, new GetUserObserver());
     }
 
-    public interface View {
-        void gotFeed(List<Status> statuses);
-
-        void removeLoadingFooterInView();
-
-        void displayErrorMessage(String message);
-
-        void addLoadingFooter();
-
-        void gotUser(User user);
-    }
 
     private class GetUserObserver implements GetUserNotificationObserver {
 
         @Override
         public void handleSuccess(User user) {
-            view.gotUser(user);
+            view.clickedUser(user);
         }
 
         @Override
@@ -83,10 +71,10 @@ public class FeedPresenter {
         @Override
         public void handleSuccess(List<Status> statuses, boolean hasMorePages) {
             setLoading(false);
-            removeLoadingFooter();
+            view.setLoadingStatus(false);
             lastStatus = (statuses.size() > 0) ? statuses.get(statuses.size() - 1) : null;
             setHasMorePages(hasMorePages);
-            view.gotFeed(statuses);
+            view.addItems(statuses);
         }
 
         @Override
@@ -101,10 +89,6 @@ public class FeedPresenter {
 
         public void setLoading(boolean value) {
             isLoading = value;
-        }
-
-        public void removeLoadingFooter() {
-            view.removeLoadingFooterInView();
         }
     }
 

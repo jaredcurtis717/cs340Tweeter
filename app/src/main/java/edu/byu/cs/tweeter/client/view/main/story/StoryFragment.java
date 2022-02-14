@@ -93,14 +93,15 @@ public class StoryFragment extends Fragment implements StoryPresenter.View {
         return view;
     }
 
-    @Override
-    public void displayGettingUser() {
-        Toast.makeText(getContext(), "Getting user's profile...", Toast.LENGTH_SHORT).show();
-    }
 
     @Override
-    public void displayNewStatuses(List<Status> statuses) {
-        storyRecyclerViewAdapter.addItems(statuses);
+    public void setLoadingStatus(boolean value) {
+        if (value){
+            storyRecyclerViewAdapter.addLoadingFooter();
+        }
+        else{
+            storyRecyclerViewAdapter.removeLoadingFooter();
+        }
     }
 
     @Override
@@ -111,18 +112,13 @@ public class StoryFragment extends Fragment implements StoryPresenter.View {
     }
 
     @Override
+    public void addItems(List items) {
+        storyRecyclerViewAdapter.addItems(items);
+    }
+
+    @Override
     public void displayErrorMessage(String s) {
         Toast.makeText(getContext(), s, Toast.LENGTH_LONG).show();
-    }
-
-    @Override
-    public void addLoadingFooter() {
-        storyRecyclerViewAdapter.addLoadingFooter();
-    }
-
-    @Override
-    public void removeLoadingFooter() {
-        storyRecyclerViewAdapter.removeLoadingFooter();
     }
 
     /**

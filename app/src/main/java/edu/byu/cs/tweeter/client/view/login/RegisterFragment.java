@@ -38,6 +38,7 @@ public class RegisterFragment extends Fragment implements RegisterPresenter.View
     private ImageView imageToUpload;
     private TextView errorView;
     private Toast registeringToast;
+    private Toast validationToast;
 
     private RegisterPresenter presenter;
 
@@ -57,8 +58,21 @@ public class RegisterFragment extends Fragment implements RegisterPresenter.View
         Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
     }
 
+
+
     @Override
-    public void registered(User registeredUser) {
+    public void displayValidationError(String message) {
+        validationToast = Toast.makeText(getContext(), message, Toast.LENGTH_LONG);
+        validationToast.show();
+    }
+
+    @Override
+    public void clearValidationError() {
+        validationToast.cancel();
+    }
+
+    @Override
+    public void navigateToUser(User registeredUser) {
         Intent intent = new Intent(getContext(), MainActivity.class);
 
         intent.putExtra(MainActivity.CURRENT_USER_KEY, registeredUser);
