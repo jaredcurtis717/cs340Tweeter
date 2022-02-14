@@ -12,12 +12,11 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.SimpleNot
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.UserEntryNotificationObserver;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 
-public class LoginService {
+public class LoginService extends Service{
 
     public void logout(AuthToken authToken, SimpleNotificationObserver logoutObserver) {
         LogoutTask logoutTask = new LogoutTask(authToken, new SimpleNotificationHandler(logoutObserver));
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(logoutTask);
+        runTask(logoutTask);
     }
 
     public void register(String firstName, String lastName, String alias, String password, String image, UserEntryNotificationObserver registerObserver) {
@@ -25,14 +24,12 @@ public class LoginService {
         RegisterTask registerTask = new RegisterTask(firstName, lastName,
                 alias, password, image, new UserEntryNotificationHandler(registerObserver));
 
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(registerTask);
+        runTask(registerTask);
     }
 
     public void login(String alias, String password, UserEntryNotificationObserver loginObserver) {
         LoginTask loginTask = new LoginTask(alias, password, new UserEntryNotificationHandler(loginObserver));
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(loginTask);
+        runTask(loginTask);
     }
 
 }

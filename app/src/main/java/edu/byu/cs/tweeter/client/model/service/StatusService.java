@@ -15,21 +15,19 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 
-public class StatusService {
+public class StatusService extends Service{
 
     public void postStatus(String post, User currUser, String dateAndTime, List<String> urls, List<String> mentions, SimpleNotificationObserver postStatusObserver) {
         Status newStatus = new Status(post, currUser, dateAndTime, urls, mentions);
         PostStatusTask statusTask = new PostStatusTask(Cache.getInstance().getCurrUserAuthToken(),
                 newStatus, new SimpleNotificationHandler(postStatusObserver));
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(statusTask);
+        runTask(statusTask);
     }
 
     public void getFeed(AuthToken authToken, User user, int pageSize, Status lastStatus, PagedNotificationObserver<Status> getFeedObserver) {
         GetFeedTask getFeedTask = new GetFeedTask(authToken,
                 user, pageSize, lastStatus, new PagedNotificationHandler<Status>(getFeedObserver));
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(getFeedTask);
+        runTask(getFeedTask);
     }
 
 }

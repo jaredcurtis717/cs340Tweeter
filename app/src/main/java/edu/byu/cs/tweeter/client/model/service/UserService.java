@@ -8,12 +8,11 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.GetUserNot
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.GetUserNotificationObserver;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 
-public class UserService {
+public class UserService extends Service{
 
     public void getUser(AuthToken authToken, String userAlias, GetUserNotificationObserver getUserObserver) {
         GetUserTask getUserTask = new GetUserTask(authToken,
                 userAlias, new GetUserNotificationHandler(getUserObserver));
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(getUserTask);
+        runTask(getUserTask);
     }
 }

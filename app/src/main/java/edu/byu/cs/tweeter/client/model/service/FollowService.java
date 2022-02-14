@@ -21,55 +21,48 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.SimpleNot
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 
-public class FollowService {
+public class FollowService extends Service{
 
 
     public void getFollowing(AuthToken currUserAuthToken, User user, int pageSize, User lastFollowee, PagedNotificationObserver<User> getFollowingObserver) {
         GetFollowingTask getFollowingTask = new GetFollowingTask(currUserAuthToken,
                 user, pageSize, lastFollowee, new PagedNotificationHandler<>(getFollowingObserver));
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(getFollowingTask);
+        runTask(getFollowingTask);
     }
 
     public void getFollowers(AuthToken currUserAuthToken, User user, int pageSize, User lastFollower, PagedNotificationObserver<User> getFollowersObserver) {
         GetFollowersTask getFollowersTask = new GetFollowersTask(currUserAuthToken,
                 user, pageSize, lastFollower, new PagedNotificationHandler<>(getFollowersObserver));
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(getFollowersTask);
+        runTask(getFollowersTask);
     }
 
     public void follow(AuthToken currUserAuthToken, User user, SimpleNotificationObserver followObserver) {
         FollowTask followTask = new FollowTask(currUserAuthToken, user, new SimpleNotificationHandler(followObserver));
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(followTask);
+        runTask(followTask);
     }
 
     public void unFollow(AuthToken authToken, User user, SimpleNotificationObserver unFollowObserver) {
         UnfollowTask unfollowTask = new UnfollowTask(authToken,
                 user, new SimpleNotificationHandler(unFollowObserver));
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(unfollowTask);
+        runTask(unfollowTask);
     }
 
     public void getFollowersCount(AuthToken authToken, User user, CountNotificationObserver getFollowersCountObserver) {
         GetFollowersCountTask followersCountTask = new GetFollowersCountTask(authToken,
                 user, new CountNotificationHandler(getFollowersCountObserver));
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(followersCountTask);
+        runTask(followersCountTask);
     }
 
     public void getFollowingCount(AuthToken authToken, User user, CountNotificationObserver getFollowingCountObserver) {
         GetFollowingCountTask followingCountTask = new GetFollowingCountTask(authToken,
                 user, new CountNotificationHandler(getFollowingCountObserver));
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(followingCountTask);
+        runTask(followingCountTask);
     }
 
     public void isFollower(AuthToken authToken, User currUser, User selectedUser, IsFollowerNotificationObserver isFollowerObserver) {
         IsFollowerTask isFollowerTask = new IsFollowerTask(authToken,
                 currUser, selectedUser, new IsFollowerNotificationHandler(isFollowerObserver));
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(isFollowerTask);
+        runTask(isFollowerTask);
     }
     
 
