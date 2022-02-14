@@ -10,6 +10,11 @@ public class FeedPresenter extends PagedStatusPresenter {
     }
 
     @Override
+    String getDescription() {
+        return "feed";
+    }
+
+    @Override
     public void callTask(User user) {
         statusService.getFeed(Cache.getInstance().getCurrUserAuthToken(), user, PAGE_SIZE, lastItem, new GetItemsObserver());
     }

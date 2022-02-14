@@ -30,7 +30,6 @@ public class MainPresenter extends Presenter<MainPresenter.View>{
         void setIsFollower(boolean value);
     }
 
-    private View view;
     private FollowService followService;
     private StatusService statusService;
     private LoginService loginService;
@@ -70,8 +69,11 @@ public class MainPresenter extends Presenter<MainPresenter.View>{
         loginService.logout(Cache.getInstance().getCurrUserAuthToken(), new LogoutObserver());
     }
 
+    public class LogoutObserver extends BaseObserver implements SimpleNotificationObserver {
 
-    public class LogoutObserver implements SimpleNotificationObserver {
+        public LogoutObserver() {
+            super(view);
+        }
 
         @Override
         public void handleSuccess() {
@@ -79,17 +81,16 @@ public class MainPresenter extends Presenter<MainPresenter.View>{
         }
 
         @Override
-        public void handleFailure(String message) {
-            view.displayErrorMessage("Failed to logout: " + message);
-        }
-
-        @Override
-        public void handleException(Exception exception) {
-            view.displayErrorMessage("Failed to logout because of exception: " + exception.getMessage());
+        String getDescription() {
+            return "logout";
         }
     }
 
-    public class GetFollowingCountObserver implements CountNotificationObserver {
+    public class GetFollowingCountObserver extends BaseObserver implements CountNotificationObserver {
+
+        public GetFollowingCountObserver() {
+            super(view);
+        }
 
         @Override
         public void handleSuccess(int count) {
@@ -97,105 +98,98 @@ public class MainPresenter extends Presenter<MainPresenter.View>{
         }
 
         @Override
-        public void handleFailure(String message) {
-            view.displayErrorMessage("Failed to get following count: " + message);
-        }
-
-        @Override
-        public void handleException(Exception exception) {
-            view.displayErrorMessage("Failed to get following count because of exception: " + exception.getMessage());
+        String getDescription() {
+            return "following";
         }
     }
 
-    public class GetFollowersCountObserver implements CountNotificationObserver {
+    public class GetFollowersCountObserver extends BaseObserver implements CountNotificationObserver {
+
+        public GetFollowersCountObserver() {
+            super(view);
+        }
 
         @Override
         public void handleSuccess(int count) {
             view.setFollowersCount(count);
         }
 
-        @Override
-        public void handleFailure(String message) {
-            view.displayErrorMessage("Failed to get followers count: " + message);
-        }
 
         @Override
-        public void handleException(Exception exception) {
-            view.displayErrorMessage("Failed to get followers count because of exception: " + exception.getMessage());
+        String getDescription() {
+            return "followers";
         }
     }
 
-    public class PostStatusObserver implements SimpleNotificationObserver {
+    public class PostStatusObserver extends BaseObserver implements SimpleNotificationObserver {
+
+        public PostStatusObserver() {
+            super(view);
+        }
 
         @Override
         public void handleSuccess() {
             view.postSuccessful();
         }
 
-        @Override
-        public void handleFailure(String message) {
-            view.displayErrorMessage("Failed to post status: " + message);
-        }
 
         @Override
-        public void handleException(Exception exception) {
-            view.displayErrorMessage("Failed to post status because of exception: " + exception.getMessage());
+        String getDescription() {
+            return "post status";
         }
     }
 
-    public class followObserver implements SimpleNotificationObserver {
+    public class followObserver extends BaseObserver implements SimpleNotificationObserver {
+
+        public followObserver() {
+            super(view);
+        }
 
         @Override
         public void handleSuccess() {
             view.followSuccessful();
         }
 
-        @Override
-        public void handleFailure(String message) {
-            view.displayErrorMessage("Failed to follow: " + message);
-        }
 
         @Override
-        public void handleException(Exception exception) {
-            view.displayErrorMessage("Failed to follow because of exception: " + exception.getMessage());
+        String getDescription() {
+            return "follow";
         }
-
     }
 
-    public class UnFollowObserver implements SimpleNotificationObserver {
+    public class UnFollowObserver extends BaseObserver implements SimpleNotificationObserver {
+
+        public UnFollowObserver() {
+            super(view);
+        }
 
         @Override
         public void handleSuccess() {
             view.unFollowSuccessful();
         }
 
-        @Override
-        public void handleFailure(String message) {
-            view.displayErrorMessage("Failed to unfollow: " + message);
-        }
 
         @Override
-        public void handleException(Exception exception) {
-            view.displayErrorMessage("Failed to unfollow because of exception: " + exception.getMessage());
+        String getDescription() {
+            return "unfollow";
         }
-
     }
 
-    public class IsFollowerObserver implements IsFollowerNotificationObserver {
+    public class IsFollowerObserver extends BaseObserver implements IsFollowerNotificationObserver {
+
+        public IsFollowerObserver() {
+            super(view);
+        }
 
         @Override
         public void handleSuccess(boolean value) {
             view.setIsFollower(value);
         }
 
-        @Override
-        public void handleFailure(String message) {
-            view.displayErrorMessage("Failed to determine following relationship: " + message);
-        }
 
         @Override
-        public void handleException(Exception ex) {
-            view.displayErrorMessage("Failed to determine following relationship because of exception: " + ex.getMessage());
+        String getDescription() {
+            return "following relationship";
         }
     }
 }

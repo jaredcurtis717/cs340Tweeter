@@ -81,7 +81,7 @@ public class LoginFragment extends Fragment implements LoginPresenter.View {
     public void displayErrorMessage(String message) {
         Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
     }
-
+/*
     @Override
     public void displayValidationError(String message) {
         validationToast = Toast.makeText(getContext(), message, Toast.LENGTH_LONG);
@@ -92,7 +92,7 @@ public class LoginFragment extends Fragment implements LoginPresenter.View {
     public void clearValidationError() {
         validationToast.cancel();
     }
-
+*/
     @Override
     public void navigateToUser(User loggedInUser) {
         Intent intent = new Intent(getContext(), MainActivity.class);

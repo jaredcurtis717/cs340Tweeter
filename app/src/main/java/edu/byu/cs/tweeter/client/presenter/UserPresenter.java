@@ -17,7 +17,11 @@ public abstract class UserPresenter extends Presenter<UserPresenter.View> {
 
     abstract String getDescription();
 
-    public class UserObserver implements UserEntryNotificationObserver {
+    public class UserObserver extends BaseObserver implements UserEntryNotificationObserver {
+
+        public UserObserver() {
+            super(view);
+        }
 
         @Override
         public void handleSuccess(User registeredUser, AuthToken authToken) {
@@ -27,13 +31,8 @@ public abstract class UserPresenter extends Presenter<UserPresenter.View> {
         }
 
         @Override
-        public void handleFailure(String message) {
-            view.displayErrorMessage("Failed to " + getDescription() + ": " + message);
-        }
-
-        @Override
-        public void handleException(Exception exception) {
-            view.displayErrorMessage("Failed to " + getDescription() + " because of exception: " + exception.getMessage());
+        String getDescription() {
+            return UserPresenter.this.getDescription();
         }
     }
 }

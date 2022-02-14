@@ -36,6 +36,8 @@ public abstract class PagedPresenter<T> extends Presenter<PagedPresenter.View<T>
         return isLoading;
     }
 
+    abstract String getDescription();
+
     public void clickItem(String userAlias) {
         userService.getUser(Cache.getInstance().getCurrUserAuthToken(), userAlias, new GetUserObserver());
     }
@@ -61,25 +63,29 @@ public abstract class PagedPresenter<T> extends Presenter<PagedPresenter.View<T>
 
     public abstract void callTask(User user);
 
-    protected class GetUserObserver implements GetUserNotificationObserver {
+    protected class GetUserObserver extends BaseObserver implements GetUserNotificationObserver {
+
+        public GetUserObserver() {
+            super(view);
+        }
 
         @Override
         public void handleSuccess(User user) {
             view.clickedUser(user);
         }
 
-        @Override
-        public void handleFailure(String message) {
-            view.displayErrorMessage("Failed to get user's profile: " + message);
-        }
 
         @Override
-        public void handleException(Exception exception) {
-            view.displayErrorMessage("Failed to get user's profile because of exception: " + exception.getMessage());
+        String getDescription() {
+            return PagedPresenter.this.getDescription();
         }
     }
 
-    protected class GetItemsObserver implements PagedNotificationObserver<T> {
+    protected class GetItemsObserver extends BaseObserver implements PagedNotificationObserver<T> {
+
+        public GetItemsObserver() {
+            super(view);
+        }
 
         @Override
         public void handleSuccess(List<T> items, boolean hasMorePages) {
@@ -91,13 +97,8 @@ public abstract class PagedPresenter<T> extends Presenter<PagedPresenter.View<T>
         }
 
         @Override
-        public void handleFailure(String message) {
-            view.displayErrorMessage("Failed to get feed: " + message);
-        }
-
-        @Override
-        public void handleException(Exception exception) {
-            view.displayErrorMessage("Failed to get feed because of exception: " + exception.getMessage());
+        String getDescription() {
+            return PagedPresenter.this.getDescription();
         }
     }
 }

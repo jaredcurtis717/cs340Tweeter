@@ -11,6 +11,11 @@ public class StoryPresenter extends PagedStatusPresenter {
     }
 
     @Override
+    String getDescription() {
+        return "story";
+    }
+
+    @Override
     public void callTask(User user) {
         statusService.getStory(Cache.getInstance().getCurrUserAuthToken(), user, PAGE_SIZE, lastItem, new GetItemsObserver());
     }

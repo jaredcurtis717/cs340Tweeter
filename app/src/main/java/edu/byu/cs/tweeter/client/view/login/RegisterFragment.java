@@ -58,7 +58,7 @@ public class RegisterFragment extends Fragment implements RegisterPresenter.View
         Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
     }
 
-
+/*
     @Override
     public void displayValidationError(String message) {
         validationToast = Toast.makeText(getContext(), message, Toast.LENGTH_LONG);
@@ -69,7 +69,7 @@ public class RegisterFragment extends Fragment implements RegisterPresenter.View
     public void clearValidationError() {
         validationToast.cancel();
     }
-
+*/
     @Override
     public void navigateToUser(User registeredUser) {
         Intent intent = new Intent(getContext(), MainActivity.class);
