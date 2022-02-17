@@ -17,7 +17,7 @@ public class PagedNotificationHandler<T> extends BackgroundTaskHandler<PagedNoti
     @Override
     protected void handleSuccessMessage(PagedNotificationObserver observer, Bundle data) {
         List<T> items = (List<T>) data.getSerializable(PagedTask.ITEMS_KEY);
-        boolean hasMorePages = data.getBoolean(GetFollowingTask.MORE_PAGES_KEY);
+
 
         observer.handleSuccess(items, hasMorePages);
     }

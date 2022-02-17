@@ -21,8 +21,6 @@ public class MainPresenter extends Presenter<MainPresenter.View>{
 
         void postSuccessful();
 
-        void setFollowButtonEnabled(boolean value);
-
         void setFollowersCount(int count);
 
         void setFollowingCount(int count);

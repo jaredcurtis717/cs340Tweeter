@@ -254,9 +254,9 @@ public class MainActivity extends AppCompatActivity implements StatusDialogFragm
     public void followSuccessful() {
         updateSelectedUserFollowingAndFollowers();
         updateFollowButton(false);
+        setFollowButtonEnabled(true);
     }
 
-    @Override
     public void setFollowButtonEnabled(boolean value) {
         followButton.setEnabled(value);
     }
@@ -270,6 +270,7 @@ public class MainActivity extends AppCompatActivity implements StatusDialogFragm
     public void unFollowSuccessful() {
         updateSelectedUserFollowingAndFollowers();
         updateFollowButton(true);
+        setFollowButtonEnabled(true);
     }
 
     @Override
