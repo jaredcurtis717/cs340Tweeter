@@ -42,12 +42,13 @@ public class MainActivity extends AppCompatActivity implements StatusDialogFragm
     private static final String LOG_TAG = "MainActivity";
     private MainPresenter presenter;
 
-    private Toast logOutToast;
     private Toast postingToast;
     private User selectedUser;
     private TextView followeeCount;
     private TextView followerCount;
     private Button followButton;
+
+    private Toast infoMessage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,8 +131,8 @@ public class MainActivity extends AppCompatActivity implements StatusDialogFragm
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.logoutMenu) {
-            logOutToast = Toast.makeText(this, "Logging Out...", Toast.LENGTH_LONG);
-            logOutToast.show();
+            infoMessage = Toast.makeText(this, "Logging Out...", Toast.LENGTH_LONG);
+            infoMessage.show();
 
             presenter.logout();
 
@@ -275,7 +276,6 @@ public class MainActivity extends AppCompatActivity implements StatusDialogFragm
 
     @Override
     public void logoutSuccessful() {
-        logOutToast.cancel();
         logoutUser();
     }
 
@@ -305,5 +305,17 @@ public class MainActivity extends AppCompatActivity implements StatusDialogFragm
             followButton.setText(R.string.follow);
             followButton.setBackgroundColor(getResources().getColor(R.color.colorAccent));
         }
+    }
+
+    @Override
+    public void displayInfoMessage(String message) {
+        infoMessage.cancel();
+        infoMessage = Toast.makeText(MainActivity.this, message, Toast.LENGTH_LONG);
+        infoMessage.show();
+    }
+
+    @Override
+    public void clearInfoMessage() {
+        infoMessage.cancel();
     }
 }

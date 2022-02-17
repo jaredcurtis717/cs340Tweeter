@@ -64,6 +64,7 @@ public class MainPresenter extends Presenter<MainPresenter.View>{
     }
 
     public void logout() {
+        view.displayInfoMessage("Logging Out");
         loginService.logout(Cache.getInstance().getCurrUserAuthToken(), new LogoutObserver());
     }
 
@@ -75,6 +76,8 @@ public class MainPresenter extends Presenter<MainPresenter.View>{
 
         @Override
         public void handleSuccess() {
+            Cache.getInstance().clearCache();
+            view.clearInfoMessage();
             view.logoutSuccessful();
         }
 

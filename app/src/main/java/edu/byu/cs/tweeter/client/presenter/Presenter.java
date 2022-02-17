@@ -9,5 +9,9 @@ public abstract class Presenter<T extends Presenter.View> {
 
     protected interface View {
         void displayErrorMessage(String message);
+
+        void displayInfoMessage(String message);
+
+        void clearInfoMessage();
     }
 }
