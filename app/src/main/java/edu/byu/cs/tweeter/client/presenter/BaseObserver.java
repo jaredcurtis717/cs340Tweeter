@@ -13,11 +13,13 @@ public abstract class BaseObserver implements ServiceObserver {
 
     @Override
     public void handleFailure(String message) {
+        baseView.clearInfoMessage();
         baseView.displayErrorMessage("Failed to get " + getDescription() + ": " + message);
     }
 
     @Override
     public void handleException(Exception exception) {
+        baseView.clearInfoMessage();
         baseView.displayErrorMessage("Failed to get " + getDescription() + " because of exception: " + exception.getMessage());
     }
 

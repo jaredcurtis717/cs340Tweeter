@@ -6,9 +6,11 @@ import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.FollowService;
 import edu.byu.cs.tweeter.client.model.service.LoginService;
 import edu.byu.cs.tweeter.client.model.service.StatusService;
+import edu.byu.cs.tweeter.client.model.service.UserService;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.CountNotificationObserver;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.IsFollowerNotificationObserver;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.SimpleNotificationObserver;
+import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 
 public class MainPresenter extends Presenter<MainPresenter.View>{
@@ -36,7 +38,20 @@ public class MainPresenter extends Presenter<MainPresenter.View>{
         super(view);
         followService = new FollowService();
         statusService = new StatusService();
-        loginService = new LoginService();
+    }
+
+    protected LoginService getLoginService(){
+        if (loginService == null){
+            loginService =  new LoginService();
+        }
+        return loginService;
+    }
+
+    protected StatusService getStatusService(){
+        if (statusService == null){
+            statusService =  new StatusService();
+        }
+        return statusService;
     }
 
     public void unfollow(User user) {
@@ -48,7 +63,9 @@ public class MainPresenter extends Presenter<MainPresenter.View>{
     }
 
     public void postStatus(String post, String dateAndTime, List<String> urls, List<String> mentions) {
-        statusService.postStatus(post, Cache.getInstance().getCurrUser(), dateAndTime, urls, mentions, new PostStatusObserver());
+        Status newStatus = new Status(post, Cache.getInstance().getCurrUser(), dateAndTime, urls, mentions);
+        view.displayInfoMessage("Posting Status");
+        getStatusService().postStatus(newStatus, new PostStatusObserver());
     }
 
     public void getFollowersCount(User user) {
@@ -65,7 +82,7 @@ public class MainPresenter extends Presenter<MainPresenter.View>{
 
     public void logout() {
         view.displayInfoMessage("Logging Out");
-        loginService.logout(Cache.getInstance().getCurrUserAuthToken(), new LogoutObserver());
+        getLoginService().logout(Cache.getInstance().getCurrUserAuthToken(), new LogoutObserver());
     }
 
     public class LogoutObserver extends BaseObserver implements SimpleNotificationObserver {
@@ -77,8 +94,8 @@ public class MainPresenter extends Presenter<MainPresenter.View>{
         @Override
         public void handleSuccess() {
             Cache.getInstance().clearCache();
-            view.clearInfoMessage();
             view.logoutSuccessful();
+            view.clearInfoMessage();
         }
 
         @Override
