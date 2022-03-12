@@ -102,6 +102,20 @@ public class StoryFragment extends Fragment implements StoryPresenter.View {
         }
     }
 
+    private Toast infoMessage;
+
+    @Override
+    public void displayInfoMessage(String message) {
+        infoMessage.cancel();
+        infoMessage = Toast.makeText(getContext(), message, Toast.LENGTH_LONG);
+        infoMessage.show();
+    }
+
+    @Override
+    public void clearInfoMessage() {
+        infoMessage.cancel();
+    }
+
     @Override
     public void clickedUser(User user) {
         Intent intent = new Intent(getContext(), MainActivity.class);

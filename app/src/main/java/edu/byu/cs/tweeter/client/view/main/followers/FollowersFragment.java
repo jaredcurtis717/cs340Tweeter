@@ -92,6 +92,20 @@ public class FollowersFragment extends Fragment implements FollowersPresenter.Vi
         Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
     }
 
+    private Toast infoMessage;
+
+    @Override
+    public void displayInfoMessage(String message) {
+        infoMessage.cancel();
+        infoMessage = Toast.makeText(getContext(), message, Toast.LENGTH_LONG);
+        infoMessage.show();
+    }
+
+    @Override
+    public void clearInfoMessage() {
+        infoMessage.cancel();
+    }
+
     @Override
     public void setLoadingStatus(boolean value) {
         if (value) {

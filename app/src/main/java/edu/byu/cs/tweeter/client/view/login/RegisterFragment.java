@@ -58,18 +58,20 @@ public class RegisterFragment extends Fragment implements RegisterPresenter.View
         Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
     }
 
-/*
+    private Toast infoMessage;
+
     @Override
-    public void displayValidationError(String message) {
-        validationToast = Toast.makeText(getContext(), message, Toast.LENGTH_LONG);
-        validationToast.show();
+    public void displayInfoMessage(String message) {
+        infoMessage.cancel();
+        infoMessage = Toast.makeText(getContext(), message, Toast.LENGTH_LONG);
+        infoMessage.show();
     }
 
     @Override
-    public void clearValidationError() {
-        validationToast.cancel();
+    public void clearInfoMessage() {
+        infoMessage.cancel();
     }
-*/
+
     @Override
     public void navigateToUser(User registeredUser) {
         Intent intent = new Intent(getContext(), MainActivity.class);

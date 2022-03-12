@@ -16,8 +16,8 @@ import edu.byu.cs.tweeter.model.domain.User;
 
 public class StatusService extends Service {
 
-    public void postStatus(String post, User currUser, String dateAndTime, List<String> urls, List<String> mentions, SimpleNotificationObserver postStatusObserver) {
-        Status newStatus = new Status(post, currUser, dateAndTime, urls, mentions);
+    public void postStatus(Status newStatus, SimpleNotificationObserver postStatusObserver) {
+
         PostStatusTask statusTask = new PostStatusTask(Cache.getInstance().getCurrUserAuthToken(),
                 newStatus, new SimpleNotificationHandler(postStatusObserver));
         runTask(statusTask);
