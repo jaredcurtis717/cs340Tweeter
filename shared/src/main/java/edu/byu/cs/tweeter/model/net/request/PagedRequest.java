@@ -6,32 +6,32 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
  * Contains all the information needed to make a request to have the server return the next page of
  * followees for a specified follower.
  */
-public class FollowingRequest {
+public class PagedRequest {
 
     private AuthToken authToken;
-    private String followerAlias;
+    private String alias;
     private int limit;
-    private String lastFolloweeAlias;
+    private String lastItem;
 
     /**
      * Allows construction of the object from Json. Private so it won't be called in normal code.
      */
-    private FollowingRequest() {}
+    private PagedRequest() {}
 
     /**
      * Creates an instance.
      *
-     * @param followerAlias the alias of the user whose followees are to be returned.
+     * @param alias the alias of the user whose followees are to be returned.
      * @param limit the maximum number of followees to return.
-     * @param lastFolloweeAlias the alias of the last followee that was returned in the previous request (null if
+     * @param lastItem the alias of the last followee that was returned in the previous request (null if
      *                     there was no previous request or if no followees were returned in the
      *                     previous request).
      */
-    public FollowingRequest(AuthToken authToken, String followerAlias, int limit, String lastFolloweeAlias) {
+    public PagedRequest(AuthToken authToken, String alias, int limit, String lastItem) {
         this.authToken = authToken;
-        this.followerAlias = followerAlias;
+        this.alias = alias;
         this.limit = limit;
-        this.lastFolloweeAlias = lastFolloweeAlias;
+        this.lastItem = lastItem;
     }
 
     /**
@@ -57,17 +57,17 @@ public class FollowingRequest {
      *
      * @return the follower.
      */
-    public String getFollowerAlias() {
-        return followerAlias;
+    public String getAlias() {
+        return alias;
     }
 
     /**
      * Sets the follower.
      *
-     * @param followerAlias the follower.
+     * @param alias the follower.
      */
-    public void setFollowerAlias(String followerAlias) {
-        this.followerAlias = followerAlias;
+    public void setAlias(String alias) {
+        this.alias = alias;
     }
 
     /**
@@ -94,16 +94,16 @@ public class FollowingRequest {
      *
      * @return the last followee.
      */
-    public String getLastFolloweeAlias() {
-        return lastFolloweeAlias;
+    public String getLastItem() {
+        return lastItem;
     }
 
     /**
      * Sets the last followee.
      *
-     * @param lastFolloweeAlias the last followee.
+     * @param lastItem the last followee.
      */
-    public void setLastFolloweeAlias(String lastFolloweeAlias) {
-        this.lastFolloweeAlias = lastFolloweeAlias;
+    public void setLastItem(String lastItem) {
+        this.lastItem = lastItem;
     }
 }

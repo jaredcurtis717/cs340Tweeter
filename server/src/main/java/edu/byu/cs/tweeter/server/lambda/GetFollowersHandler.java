@@ -3,14 +3,14 @@ package edu.byu.cs.tweeter.server.lambda;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 
-import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
+import edu.byu.cs.tweeter.model.net.request.PagedRequest;
 import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
 import edu.byu.cs.tweeter.server.service.FollowService;
 
 /**
  * An AWS lambda function that returns the users that follow a user.
  */
-public class GetFollowersHandler implements RequestHandler<FollowingRequest, FollowingResponse> {
+public class GetFollowersHandler implements RequestHandler<PagedRequest, FollowingResponse> {
     /**
      * Returns the users that follow the specified user. Uses information in
      * the request object to limit the number of followers returned and to return the next set of
@@ -21,7 +21,7 @@ public class GetFollowersHandler implements RequestHandler<FollowingRequest, Fol
      * @return the followers.
      */
     @Override
-    public FollowingResponse handleRequest(FollowingRequest request, Context context) {
+    public FollowingResponse handleRequest(PagedRequest request, Context context) {
         FollowService service = new FollowService();
         return service.getFollowers(request);
     }

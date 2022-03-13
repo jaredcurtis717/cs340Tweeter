@@ -2,14 +2,10 @@ package edu.byu.cs.tweeter.client.model.service.backgroundTask;
 
 import android.os.Handler;
 
-import java.io.IOException;
-import java.util.List;
-
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
-import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
+import edu.byu.cs.tweeter.model.net.request.PagedRequest;
 import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
-import edu.byu.cs.tweeter.util.Pair;
 
 /**
  * Background task that retrieves a page of other users being followed by a specified user.
@@ -24,12 +20,12 @@ public class GetFollowingTask extends PagedUserTask {
 
     @Override
     protected void runTask() throws Exception {
-        FollowingRequest request;
+        PagedRequest request;
         if (getLastItem() == null){
-            request = new FollowingRequest(getAuthToken(), getTargetUser().getAlias(), getLimit(), null);
+            request = new PagedRequest(getAuthToken(), getTargetUser().getAlias(), getLimit(), null);
         }
         else{
-            request = new FollowingRequest(getAuthToken(), getTargetUser().getAlias(), getLimit(), getLastItem().getAlias());
+            request = new PagedRequest(getAuthToken(), getTargetUser().getAlias(), getLimit(), getLastItem().getAlias());
         }
         FollowingResponse response = getServerFacade().getFollowees(request, URL_PATH);
 

@@ -1,34 +1,35 @@
 package edu.byu.cs.tweeter.server.service;
 
 import edu.byu.cs.tweeter.model.net.request.PagedRequest;
-import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
+import edu.byu.cs.tweeter.model.net.response.StatusesResponse;
 import edu.byu.cs.tweeter.server.dao.FollowDAO;
+import edu.byu.cs.tweeter.server.dao.GetStatusesDAO;
 
 /**
  * Contains the business logic for getting the users a user is following.
  */
-public class FollowService {
+public class StatusService {
 
     /**
-     * Returns the users that the user specified in the request is following. Uses information in
-     * the request object to limit the number of followees returned and to return the next set of
+     * Returns the feed of the given user. Uses information in
+     * the request object to limit the number of statuses returned and to return the next set of
      * followees after any that were returned in a previous request. Uses the {@link FollowDAO} to
      * get the followees.
      *
      * @param request contains the data required to fulfill the request.
      * @return the followees.
      */
-    public FollowingResponse getFollowees(PagedRequest request) {
+    public StatusesResponse getFeed(PagedRequest request) {
         if(request.getAlias() == null) {
-            throw new RuntimeException("[BadRequest] Request needs to have a follower alias");
+            throw new RuntimeException("[BadRequest] Request needs to have a user alias");
         } else if(request.getLimit() <= 0) {
             throw new RuntimeException("[BadRequest] Request needs to have a positive limit");
         }
-        return getFollowingDAO().getFollowees(request);
+        return getStatusesDAO().getFeed(request);
     }
 
     /**
-     * Returns the users that follow the user. Uses information in
+     * Returns the story of the given user. Uses information in
      * the request object to limit the number of followers returned and to return the next set of
      * followers after any that were returned in a previous request. Uses the {@link FollowDAO} to
      * get the followers.
@@ -36,13 +37,13 @@ public class FollowService {
      * @param request contains the data required to fulfill the request.
      * @return the followers.
      */
-    public FollowingResponse getFollowers(PagedRequest request) {
+    public StatusesResponse getStory(PagedRequest request) {
         if(request.getAlias() == null) {
-            throw new RuntimeException("[BadRequest] Request needs to have a follower alias");
+            throw new RuntimeException("[BadRequest] Request needs to have a user alias");
         } else if(request.getLimit() <= 0) {
             throw new RuntimeException("[BadRequest] Request needs to have a positive limit");
         }
-        return getFollowingDAO().getFollowers(request);
+        return getStatusesDAO().getStory(request);
     }
 
     /**
@@ -52,7 +53,7 @@ public class FollowService {
      *
      * @return the instance.
      */
-    FollowDAO getFollowingDAO() {
-        return new FollowDAO();
+    GetStatusesDAO getStatusesDAO() {
+        return new GetStatusesDAO();
     }
 }
