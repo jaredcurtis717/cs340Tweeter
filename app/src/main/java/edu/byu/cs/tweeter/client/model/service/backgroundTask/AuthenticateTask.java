@@ -2,17 +2,20 @@ package edu.byu.cs.tweeter.client.model.service.backgroundTask;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 
 import java.io.IOException;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.response.LoginResponse;
 import edu.byu.cs.tweeter.util.Pair;
 
 public abstract class AuthenticateTask extends BackgroundTask {
 
     public static final String USER_KEY = "user";
     public static final String AUTH_TOKEN_KEY = "auth-token";
+    private static final String LOG_TAG = "AuthenticateTask";
 
     private User authenticatedUser;
 
@@ -37,18 +40,27 @@ public abstract class AuthenticateTask extends BackgroundTask {
 
     @Override
     protected final void runTask() throws IOException {
-        Pair<User, AuthToken> loginResult = runAuthenticationTask();
+        try{
+            LoginResponse loginResult = runAuthenticationTask();
 
-        authenticatedUser = loginResult.getFirst();
-        authToken = loginResult.getSecond();
+            if (loginResult.isSuccess()){
+                authenticatedUser = loginResult.getUser();
+                authToken = loginResult.getAuthToken();
 
-        // Call sendSuccessMessage if successful
-        sendSuccessMessage();
-        // or call sendFailedMessage if not successful
-        // sendFailedMessage()
+                sendSuccessMessage();
+            }
+            else{
+                sendFailedMessage(loginResult.getMessage());
+            }
+
+        } catch (Exception exception) {
+            Log.e(LOG_TAG, exception.getMessage(), exception);
+            sendExceptionMessage(exception);
+        }
+
     }
 
-    protected abstract Pair<User, AuthToken> runAuthenticationTask();
+    protected abstract LoginResponse runAuthenticationTask() throws Exception;
 
     @Override
     protected void loadSuccessBundle(Bundle msgBundle) {

@@ -2,15 +2,16 @@ package edu.byu.cs.tweeter.client.model.service.backgroundTask;
 
 import android.os.Handler;
 
-import edu.byu.cs.tweeter.model.domain.AuthToken;
-import edu.byu.cs.tweeter.model.domain.User;
-import edu.byu.cs.tweeter.util.Pair;
+import edu.byu.cs.tweeter.model.net.request.LoginRequest;
+import edu.byu.cs.tweeter.model.net.request.RegisterRequest;
+import edu.byu.cs.tweeter.model.net.response.LoginResponse;
 
 /**
  * Background task that creates a new user account and logs in the new user (i.e., starts a session).
  */
 public class RegisterTask extends AuthenticateTask {
 
+    private static final String URL_PATH = "/register";
     /**
      * The user's first name.
      */
@@ -35,9 +36,14 @@ public class RegisterTask extends AuthenticateTask {
     }
 
     @Override
-    protected Pair<User, AuthToken> runAuthenticationTask() {
-        User registeredUser = getFakeData().getFirstUser();
-        AuthToken authToken = getFakeData().getAuthToken();
-        return new Pair<>(registeredUser, authToken);
+    protected LoginResponse runAuthenticationTask() throws Exception{
+        try {
+            RegisterRequest request = new RegisterRequest();//TODO: fix constructor
+            LoginResponse response = getServerFacade().register(request, URL_PATH);
+
+            return response;
+        } catch (Exception ex) {
+            throw ex;
+        }
     }
 }

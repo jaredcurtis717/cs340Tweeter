@@ -93,7 +93,9 @@ public class LoginFragment extends Fragment implements LoginPresenter.View {
 
     @Override
     public void clearInfoMessage() {
-        infoMessage.cancel();
+        if (infoMessage != null){
+            infoMessage.cancel();
+        }
     }
 
     @Override
