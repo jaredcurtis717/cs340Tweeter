@@ -38,10 +38,8 @@ public class RegisterTask extends AuthenticateTask {
     @Override
     protected LoginResponse runAuthenticationTask() throws Exception{
         try {
-            RegisterRequest request = new RegisterRequest();//TODO: fix constructor
-            LoginResponse response = getServerFacade().register(request, URL_PATH);
-
-            return response;
+            RegisterRequest request = new RegisterRequest(firstName, lastName, username, password, image);
+            return  getServerFacade().register(request, URL_PATH);
         } catch (Exception ex) {
             throw ex;
         }
