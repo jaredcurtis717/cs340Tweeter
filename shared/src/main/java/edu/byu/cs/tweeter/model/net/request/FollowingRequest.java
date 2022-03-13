@@ -36,7 +36,7 @@ public class FollowingRequest {
 
     /**
      * Returns the auth token of the user who is making the request.
-     *
+     *Au
      * @return the auth token.
      */
     public AuthToken getAuthToken() {

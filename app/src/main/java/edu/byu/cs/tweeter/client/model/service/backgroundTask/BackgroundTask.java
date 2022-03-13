@@ -45,7 +45,7 @@ public abstract class BackgroundTask implements Runnable {
         return serverFacade;
     }
 
-    protected abstract void runTask() throws IOException;
+    protected abstract void runTask() throws  Exception;
 
     protected FakeData getFakeData() {
         return new FakeData();

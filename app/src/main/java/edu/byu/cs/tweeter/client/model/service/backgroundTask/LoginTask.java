@@ -15,7 +15,6 @@ import edu.byu.cs.tweeter.util.Pair;
  * Background task that logs in a user (i.e., starts a session).
  */
 public class LoginTask extends AuthenticateTask {
-    private static final String LOG_TAG = "LoginTask";
     private static final String URL_PATH = "/login";
 
 

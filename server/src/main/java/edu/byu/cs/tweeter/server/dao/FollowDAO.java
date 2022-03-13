@@ -62,6 +62,41 @@ public class FollowDAO {
     }
 
     /**
+     * Gets the users from the database that the user specified in the request is following. Uses
+     * information in the request object to limit the number of followers returned and to return the
+     * next set of followers after any that were returned in a previous request. The current
+     * implementation returns generated data and doesn't actually access a database.
+     *
+     * @param request contains information about the user whose followers are to be returned and any
+     *                other information required to satisfy the request.
+     * @return the followers.
+     */
+    public FollowingResponse getFollowers(FollowingRequest request) {
+        // TODO: Generates dummy data. Replace with a real implementation.
+        assert request.getLimit() > 0;
+        assert request.getFollowerAlias() != null;
+
+        List<User> allFollowees = getDummyFollowees();
+        List<User> responseFollowees = new ArrayList<>(request.getLimit());
+
+        boolean hasMorePages = false;
+
+        if(request.getLimit() > 0) {
+            if (allFollowees != null) {
+                int followeesIndex = getFolloweesStartingIndex(request.getLastFolloweeAlias(), allFollowees);
+
+                for(int limitCounter = 0; followeesIndex < allFollowees.size() && limitCounter < request.getLimit(); followeesIndex++, limitCounter++) {
+                    responseFollowees.add(allFollowees.get(followeesIndex));
+                }
+
+                hasMorePages = followeesIndex < allFollowees.size();
+            }
+        }
+
+        return new FollowingResponse(responseFollowees, hasMorePages);
+    }
+
+    /**
      * Determines the index for the first followee in the specified 'allFollowees' list that should
      * be returned in the current request. This will be the index of the next followee after the
      * specified 'lastFollowee'.

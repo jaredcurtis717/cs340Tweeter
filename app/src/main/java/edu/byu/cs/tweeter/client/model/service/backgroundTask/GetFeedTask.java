@@ -20,7 +20,9 @@ public class GetFeedTask extends PagedStatusTask {
     }
 
     @Override
-    protected Pair<List<Status>, Boolean> getItems() {
-        return getFakeData().getPageOfStatus(getLastItem(), getLimit());
+    protected void runTask() throws Exception {
+        throw new RuntimeException("Not implemented");
     }
+
+
 }

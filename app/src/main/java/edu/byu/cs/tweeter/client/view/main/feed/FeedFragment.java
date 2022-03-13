@@ -126,7 +126,9 @@ public class FeedFragment extends Fragment implements FeedPresenter.View {
 
     @Override
     public void clearInfoMessage() {
-        infoMessage.cancel();
+        if (infoMessage != null){
+            infoMessage.cancel();
+        }
     }
 
     @Override

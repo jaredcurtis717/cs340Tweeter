@@ -101,7 +101,9 @@ public class FollowingFragment extends Fragment implements FollowingPresenter.Vi
 
     @Override
     public void clearInfoMessage() {
-        infoMessage.cancel();
+        if (infoMessage != null){
+            infoMessage.cancel();
+        }
     }
 
     @Override
