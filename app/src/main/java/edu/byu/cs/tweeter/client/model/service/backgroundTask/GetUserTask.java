@@ -5,11 +5,14 @@ import android.os.Handler;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.request.TargetUserRequest;
+import edu.byu.cs.tweeter.model.net.response.UserResponse;
 
 /**
  * Background task that returns the profile for a specified user.
  */
 public class GetUserTask extends AuthenticatedTask {
+    private static final String URL_PATH = "/getuser";
 
     public static final String USER_KEY = "user";
 
@@ -26,21 +29,21 @@ public class GetUserTask extends AuthenticatedTask {
     }
 
     @Override
-    protected void runTask() {
-        user = getUser();
+    protected void runTask() throws Exception{
+        TargetUserRequest request = new TargetUserRequest(getAuthToken(), alias);
+        UserResponse response = getServerFacade().getUser(request, URL_PATH);
 
-        // Call sendSuccessMessage if successful
-        sendSuccessMessage();
-        // or call sendFailedMessage if not successful
-        // sendFailedMessage()
+        if (response.isSuccess()){
+            user = response.getUser();
+            sendSuccessMessage();
+        }
+        else {
+            sendFailedMessage(response.getMessage());
+        }
     }
 
     @Override
     protected void loadSuccessBundle(Bundle msgBundle) {
         msgBundle.putSerializable(USER_KEY, user);
-    }
-
-    private User getUser() {
-        return getFakeData().findUserByAlias(alias);
     }
 }

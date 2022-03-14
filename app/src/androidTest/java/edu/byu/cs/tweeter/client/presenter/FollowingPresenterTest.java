@@ -11,7 +11,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import edu.byu.cs.tweeter.client.model.service.FollowService;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedNotificationObserver;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
+import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 
 import static org.junit.Assert.assertEquals;
@@ -21,7 +23,6 @@ import static org.junit.Assert.assertTrue;
 
 public class FollowingPresenterTest {
 
-/*
     private static final String MALE_IMAGE_URL = "https://faculty.cs.byu.edu/~jwilkerson/cs340/tweeter/images/donald_duck.png";
     private static final String FEMALE_IMAGE_URL = "https://faculty.cs.byu.edu/~jwilkerson/cs340/tweeter/images/daisy_duck.png";
 
@@ -37,13 +38,13 @@ public class FollowingPresenterTest {
     private FollowingPresenter followingPresenterSpy;
     private FollowingPresenter.View followingViewMock;
 
-    */
+
 /**
      * Setup mocks and spies needed to let test cases control what users are returned
      * by {@link FollowService}.
      * Setup mock {@link FollowingPresenter} to verify that {@link FollowingPresenter}
      * correctly calls view methods.
-     *//*
+     */
 
     @Before
     public void setup() {
@@ -55,22 +56,22 @@ public class FollowingPresenterTest {
 
         // Create the mocks and spies needed to let test cases control what users are returned
         // FollowService.
-        FollowingPresenter followingPresenter = new FollowingPresenter(followingViewMock, fakeUser, fakeAuthToken);
+        FollowingPresenter followingPresenter = new FollowingPresenter(followingViewMock);
         followingPresenterSpy = Mockito.spy(followingPresenter);
 
         followingServiceMock = Mockito.mock(FollowService.class);
-        Mockito.doReturn(followingServiceMock).when(followingPresenterSpy).getFollowingService();
+        Mockito.doReturn(followingServiceMock).when(followingPresenterSpy).getFollowService();
     }
 
-    */
+
 /**
      * Verify that {@link FollowingPresenter} has the correct initial state.
-     *//*
+     */
 
     @Test
     public void testInitialPresenterState() {
-        assertNull(followingPresenterSpy.getLastFollowee());
-        assertTrue(followingPresenterSpy.isHasMorePages());
+        assertNull(followingPresenterSpy.lastItem);
+        assertTrue(followingPresenterSpy.hasMorePages);
         assertFalse(followingPresenterSpy.isLoading());
     }
 
@@ -90,9 +91,9 @@ public class FollowingPresenterTest {
                 Assert.assertEquals(fakeUser, user);
                 Assert.assertEquals(fakeAuthToken, authToken);
                 Assert.assertEquals(limit, FollowingPresenter.PAGE_SIZE);
-                Assert.assertEquals(lastFollowee, followingPresenterSpy.getLastFollowee());
+                Assert.assertEquals(lastFollowee, followingPresenterSpy.lastItem);
 
-                FollowService.GetFollowingObserver observer = invocation.getArgument(4);
+                PagedNotificationObserver<User> observer = invocation.getArgument(4);
                 observer.handleSuccess(followees, true);
                 return null;
             }
@@ -103,11 +104,11 @@ public class FollowingPresenterTest {
 
 
 
-    */
+
 /**
      * Verify that {@link FollowingPresenter#loadMoreItems} works correctly when there
      * are some pages of followees.
-     *//*
+     */
 
     @Test
     public void testLoadMoreItems_GetFolloweesSuccess() throws InterruptedException {
@@ -134,11 +135,11 @@ public class FollowingPresenterTest {
         Mockito.verify(followingViewMock).addItems(Arrays.asList(user1, user2, user3, user4, user5));
     }
 
-    */
+
 /**
      * Verify that {@link FollowingPresenter#loadMoreItems} works correctly when there
      * are between two and three pages of followees.
-     *//*
+     */
 
     @Test
     public void testLoadMoreItems_GetFolloweesFailsWithErrorMessage() throws InterruptedException {
@@ -184,7 +185,4 @@ public class FollowingPresenterTest {
         Mockito.verify(followingViewMock).displayErrorMessage("Failed to retrieve followees because of exception: " + "The exception message");
         Mockito.verify(followingViewMock, Mockito.times(0)).addItems(Mockito.any());
     }
-*/
-
-
 }

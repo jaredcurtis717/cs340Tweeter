@@ -17,6 +17,6 @@ public class FollowingPresenter extends PagedUserPresenter {
 
     @Override
     public void callTask(User user) {
-        followService.getFollowing(Cache.getInstance().getCurrUserAuthToken(), user, PAGE_SIZE, lastItem, new GetItemsObserver());
+        getFollowService().getFollowing(Cache.getInstance().getCurrUserAuthToken(), user, PAGE_SIZE, lastItem, new GetItemsObserver());
     }
 }
