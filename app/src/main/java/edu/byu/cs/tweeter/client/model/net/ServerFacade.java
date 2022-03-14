@@ -3,12 +3,15 @@ package edu.byu.cs.tweeter.client.model.net;
 import java.io.IOException;
 
 import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
+import edu.byu.cs.tweeter.model.net.request.FollowRequest;
 import edu.byu.cs.tweeter.model.net.request.PagedRequest;
 import edu.byu.cs.tweeter.model.net.request.LoginRequest;
 import edu.byu.cs.tweeter.model.net.request.RegisterRequest;
 import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
 import edu.byu.cs.tweeter.model.net.response.LoginResponse;
+import edu.byu.cs.tweeter.model.net.response.Response;
 import edu.byu.cs.tweeter.model.net.response.StatusesResponse;
+
 
 /**
  * Acts as a Facade to the Tweeter server. All network requests to the server should go through
@@ -61,5 +64,15 @@ public class ServerFacade {
     public StatusesResponse getStatuses(PagedRequest request, String urlPath)
             throws IOException, TweeterRemoteException {
         return clientCommunicator.doPost(urlPath, request, null, StatusesResponse.class);
+    }
+
+    /**
+     * sets the current user to be following the user designated in request.
+     * @param request contains the current logged in users authToken and the alias to be followed
+     * @param urlPath path to follow endpoint
+     * @return basic response
+     */
+    public Response follow(FollowRequest request, String urlPath) throws IOException, TweeterRemoteException {
+        return clientCommunicator.doPost(urlPath, request, null, Response.class);
     }
 }

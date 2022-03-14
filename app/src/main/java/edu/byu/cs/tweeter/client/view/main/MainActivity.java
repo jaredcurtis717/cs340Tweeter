@@ -316,6 +316,8 @@ public class MainActivity extends AppCompatActivity implements StatusDialogFragm
 
     @Override
     public void clearInfoMessage() {
-        infoMessage.cancel();
+        if(infoMessage != null){
+            infoMessage.cancel();
+        }
     }
 }

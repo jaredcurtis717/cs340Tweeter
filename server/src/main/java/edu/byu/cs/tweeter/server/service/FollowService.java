@@ -1,7 +1,10 @@
 package edu.byu.cs.tweeter.server.service;
 
+import edu.byu.cs.tweeter.model.net.request.FollowRequest;
 import edu.byu.cs.tweeter.model.net.request.PagedRequest;
 import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
+import edu.byu.cs.tweeter.model.net.response.Response;
+import edu.byu.cs.tweeter.model.net.response.StatusesResponse;
 import edu.byu.cs.tweeter.server.dao.FollowDAO;
 
 /**
@@ -45,6 +48,28 @@ public class FollowService {
         return getFollowingDAO().getFollowers(request);
     }
 
+    public Response follow(FollowRequest request) {
+        if (request.getAuthToken() == null){
+            throw new RuntimeException("[BadRequest] invalid authToken");
+        } else if(request.getUser() == null) {
+            throw new RuntimeException("[BadRequest] Request needs to have user to follow");
+        }
+
+        // TODO: Generates dummy data. Replace with a real implementation.
+        return new Response(true, null);
+    }
+
+    public Response unfollow(FollowRequest request) {
+        if (request.getAuthToken() == null){
+            throw new RuntimeException("[BadRequest] invalid authToken");
+        } else if(request.getUser() == null) {
+            throw new RuntimeException("[BadRequest] Request needs to have user to unfollow");
+        }
+
+        // TODO: Generates dummy data. Replace with a real implementation.
+        return new Response(true, null);
+    }
+
     /**
      * Returns an instance of {@link FollowDAO}. Allows mocking of the FollowDAO class
      * for testing purposes. All usages of FollowDAO should get their FollowDAO
@@ -55,4 +80,7 @@ public class FollowService {
     FollowDAO getFollowingDAO() {
         return new FollowDAO();
     }
+
+
+
 }
