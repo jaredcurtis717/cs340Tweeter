@@ -2,7 +2,6 @@ package edu.byu.cs.tweeter.client.model.service.backgroundTask;
 
 import android.os.Handler;
 
-import edu.byu.cs.tweeter.model.net.request.LoginRequest;
 import edu.byu.cs.tweeter.model.net.request.RegisterRequest;
 import edu.byu.cs.tweeter.model.net.response.LoginResponse;
 
@@ -37,11 +36,7 @@ public class RegisterTask extends AuthenticateTask {
 
     @Override
     protected LoginResponse runAuthenticationTask() throws Exception{
-        try {
-            RegisterRequest request = new RegisterRequest(firstName, lastName, username, password, image);
-            return  getServerFacade().register(request, URL_PATH);
-        } catch (Exception ex) {
-            throw ex;
-        }
+        RegisterRequest request = new RegisterRequest(firstName, lastName, username, password, image);
+        return  getServerFacade().register(request, URL_PATH);
     }
 }

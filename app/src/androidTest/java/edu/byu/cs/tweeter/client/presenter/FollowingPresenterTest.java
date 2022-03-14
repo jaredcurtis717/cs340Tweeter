@@ -1,5 +1,10 @@
 package edu.byu.cs.tweeter.client.presenter;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,13 +18,7 @@ import java.util.List;
 import edu.byu.cs.tweeter.client.model.service.FollowService;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedNotificationObserver;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
-import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 public class FollowingPresenterTest {
 
@@ -98,15 +97,15 @@ public class FollowingPresenterTest {
                 return null;
             }
         };
-        Mockito.doAnswer(manyFolloweesAnswer).when(followingServiceMock).getFollowees(Mockito.any(), Mockito.any(), Mockito.anyInt(), Mockito.any(), Mockito.any());
-        followingPresenterSpy.loadMoreItems();
+        Mockito.doAnswer(manyFolloweesAnswer).when(followingServiceMock).getFollowing(Mockito.any(), Mockito.any(), Mockito.anyInt(), Mockito.any(), Mockito.any());
+        followingPresenterSpy.loadItems(fakeUser);
     }
 
 
 
 
 /**
-     * Verify that {@link FollowingPresenter#loadMoreItems} works correctly when there
+     * Verify that {@link FollowingPresenter#loadItems(User)} works correctly when there
      * are some pages of followees.
      */
 
@@ -117,27 +116,27 @@ public class FollowingPresenterTest {
         Answer<Void> manyFolloweesAnswer = new Answer<Void>() {
             @Override
             public Void answer(InvocationOnMock invocation) throws Throwable {
-                FollowService.GetFollowingObserver observer = invocation.getArgument(4);
+                PagedNotificationObserver<User> observer = invocation.getArgument(4);
                 observer.handleSuccess(followees, true);
                 return null;
             }
         };
-        Mockito.doAnswer(manyFolloweesAnswer).when(followingServiceMock).getFollowees(Mockito.any(), Mockito.any(), Mockito.anyInt(), Mockito.any(), Mockito.any());
+        Mockito.doAnswer(manyFolloweesAnswer).when(followingServiceMock).getFollowing(Mockito.any(), Mockito.any(), Mockito.anyInt(), Mockito.any(), Mockito.any());
 
-        followingPresenterSpy.loadMoreItems();
+        followingPresenterSpy.loadItems(fakeUser);
 
-        assertEquals(user5, followingPresenterSpy.getLastFollowee());
-        assertTrue(followingPresenterSpy.isHasMorePages());
+        assertEquals(user5, followingPresenterSpy.lastItem);
+        assertTrue(followingPresenterSpy.hasMorePages);
         assertFalse(followingPresenterSpy.isLoading());
 
-        Mockito.verify(followingViewMock).setLoading(true);
-        Mockito.verify(followingViewMock).setLoading(false);
+        Mockito.verify(followingViewMock).setLoadingStatus(true);
+        Mockito.verify(followingViewMock).setLoadingStatus(false);
         Mockito.verify(followingViewMock).addItems(Arrays.asList(user1, user2, user3, user4, user5));
     }
 
 
 /**
-     * Verify that {@link FollowingPresenter#loadMoreItems} works correctly when there
+     * Verify that {@link FollowingPresenter#loadItems(User)} works correctly when there
      * are between two and three pages of followees.
      */
 
@@ -146,19 +145,19 @@ public class FollowingPresenterTest {
         Answer<Void> failureAnswer = new Answer<Void>() {
             @Override
             public Void answer(InvocationOnMock invocation) throws Throwable {
-                FollowService.GetFollowingObserver observer = invocation.getArgument(4);
+                PagedNotificationObserver<User> observer = invocation.getArgument(4);
                 observer.handleFailure("failure message");
                 return null;
             }
         };
-        Mockito.doAnswer(failureAnswer).when(followingServiceMock).getFollowees(Mockito.any(), Mockito.any(), Mockito.anyInt(), Mockito.any(), Mockito.any());
+        Mockito.doAnswer(failureAnswer).when(followingServiceMock).getFollowing(Mockito.any(), Mockito.any(), Mockito.anyInt(), Mockito.any(), Mockito.any());
 
-        followingPresenterSpy.loadMoreItems();
+        followingPresenterSpy.loadItems(fakeUser);
 
         assertFalse(followingPresenterSpy.isLoading());
 
-        Mockito.verify(followingViewMock).setLoading(true);
-        Mockito.verify(followingViewMock).setLoading(false);
+        Mockito.verify(followingViewMock).setLoadingStatus(true);
+        Mockito.verify(followingViewMock).setLoadingStatus(false);
         Mockito.verify(followingViewMock).displayErrorMessage("Failed to retrieve followees: " + "failure message");
         Mockito.verify(followingViewMock, Mockito.times(0)).addItems(Mockito.any());
     }
@@ -168,20 +167,20 @@ public class FollowingPresenterTest {
         Answer<Void> exceptionAnswer = new Answer<Void>() {
             @Override
             public Void answer(InvocationOnMock invocation) throws Throwable {
-                FollowService.GetFollowingObserver observer = invocation.getArgument(4);
+                PagedNotificationObserver<User> observer = invocation.getArgument(4);
                 observer.handleException(new Exception("The exception message"));
                 return null;
             }
         };
-        Mockito.doAnswer(exceptionAnswer).when(followingServiceMock).getFollowees(Mockito.any(), Mockito.any(), Mockito.anyInt(), Mockito.any(), Mockito.any());
+        Mockito.doAnswer(exceptionAnswer).when(followingServiceMock).getFollowing(Mockito.any(), Mockito.any(), Mockito.anyInt(), Mockito.any(), Mockito.any());
 
-        followingPresenterSpy.loadMoreItems();
+        followingPresenterSpy.loadItems(fakeUser);
 
 
         assertFalse(followingPresenterSpy.isLoading());
 
-        Mockito.verify(followingViewMock).setLoading(true);
-        Mockito.verify(followingViewMock).setLoading(false);
+        Mockito.verify(followingViewMock).setLoadingStatus(true);
+        Mockito.verify(followingViewMock).setLoadingStatus(false);
         Mockito.verify(followingViewMock).displayErrorMessage("Failed to retrieve followees because of exception: " + "The exception message");
         Mockito.verify(followingViewMock, Mockito.times(0)).addItems(Mockito.any());
     }

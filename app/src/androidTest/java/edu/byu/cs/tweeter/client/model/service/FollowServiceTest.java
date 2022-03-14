@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import edu.byu.cs.tweeter.client.model.net.ServerFacade;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.observer.PagedNotificationObserver;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.util.FakeData;
@@ -51,12 +52,12 @@ public class FollowServiceTest {
     }
 
     /**
-     * A {@link FollowService.GetFollowingObserver} implementation that can be used to get the values
+     * A {@link PagedNotificationObserver<User>} implementation that can be used to get the values
      * eventually returned by an asynchronous call on the {@link FollowService}. Counts down
      * on the countDownLatch so tests can wait for the background thread to call a method on the
      * observer.
      */
-    private class FollowServiceObserver implements FollowService.GetFollowingObserver {
+    private class FollowServiceObserver implements PagedNotificationObserver<User> {
 
         private boolean success;
         private String message;
@@ -119,12 +120,12 @@ public class FollowServiceTest {
     }
 
     /**
-     * Verify that for successful requests, the {@link FollowService#getFollowees}
+     * Verify that for successful requests, the {@link FollowService#getFollowing}
      * asynchronous method eventually returns the same result as the {@link ServerFacade}.
      */
     @Test
     public void testGetFollowees_validRequest_correctResponse() throws InterruptedException {
-        followServiceSpy.getFollowees(currentAuthToken, currentUser, 3, null, observer);
+        followServiceSpy.getFollowing(currentAuthToken, currentUser, 3, null, observer);
         awaitCountDownLatch();
 
         List<User> expectedFollowees = new FakeData().getFakeUsers().subList(0, 3);
@@ -136,12 +137,12 @@ public class FollowServiceTest {
     }
 
     /**
-     * Verify that for successful requests, the the {@link FollowService#getFollowees}
+     * Verify that for successful requests, the the {@link FollowService#getFollowing}
      * method loads the profile image of each user included in the result.
      */
     @Test
     public void testGetFollowees_validRequest_loadsProfileImages() throws InterruptedException {
-        followServiceSpy.getFollowees(currentAuthToken, currentUser, 3, null, observer);
+        followServiceSpy.getFollowing(currentAuthToken, currentUser, 3, null, observer);
         awaitCountDownLatch();
 
         List<User> followees = observer.getFollowees();
@@ -149,12 +150,12 @@ public class FollowServiceTest {
     }
 
     /**
-     * Verify that for unsuccessful requests, the the {@link FollowService#getFollowees}
+     * Verify that for unsuccessful requests, the the {@link FollowService#getFollowing}
      * method returns the same failure response as the server facade.
      */
     @Test
     public void testGetFollowees_invalidRequest_returnsNoFollowees() throws InterruptedException {
-        followServiceSpy.getFollowees(null, null, 0, null, observer);
+        followServiceSpy.getFollowing(null, null, 0, null, observer);
         awaitCountDownLatch();
 
         Assert.assertFalse(observer.isSuccess());
