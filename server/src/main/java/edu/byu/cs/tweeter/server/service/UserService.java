@@ -4,6 +4,8 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.LoginRequest;
 import edu.byu.cs.tweeter.model.net.request.RegisterRequest;
+import edu.byu.cs.tweeter.model.net.request.TargetUserRequest;
+import edu.byu.cs.tweeter.model.net.response.IntResponse;
 import edu.byu.cs.tweeter.model.net.response.LoginResponse;
 import edu.byu.cs.tweeter.util.FakeData;
 
@@ -42,6 +44,28 @@ public class UserService {
         return new LoginResponse(user, authToken);
     }
 
+    public IntResponse getFollowerCount(TargetUserRequest request) {
+        if (request.getAuthToken() == null){
+            throw new RuntimeException("[BadRequest] invalid authToken");
+        } else if(request.getUser() == null){
+            throw new RuntimeException("[BadRequest] missing user");
+        }
+
+        // TODO: Generates dummy data. Replace with a real implementation.
+        return new IntResponse(20);
+    }
+
+    public IntResponse getFollowingCount(TargetUserRequest request) {
+        if (request.getAuthToken() == null){
+            throw new RuntimeException("[BadRequest] invalid authToken");
+        } else if(request.getUser() == null){
+            throw new RuntimeException("[BadRequest] missing user");
+        }
+
+        // TODO: Generates dummy data. Replace with a real implementation.
+        return new IntResponse(20);
+    }
+
     /**
      * Returns the dummy user to be returned by the login operation.
      * This is written as a separate method to allow mocking of the dummy user.
@@ -71,4 +95,7 @@ public class UserService {
     FakeData getFakeData() {
         return new FakeData();
     }
+
+
+
 }

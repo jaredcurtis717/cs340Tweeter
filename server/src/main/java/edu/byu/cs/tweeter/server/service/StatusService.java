@@ -55,6 +55,7 @@ public class StatusService {
             throw new RuntimeException("[BadRequest] Request needs to have a status to post");
         }
 
+        //Todo: this sends dummy data
         return new Response(true);
     }
 

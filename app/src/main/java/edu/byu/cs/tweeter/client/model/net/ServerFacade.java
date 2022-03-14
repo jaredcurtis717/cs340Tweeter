@@ -3,14 +3,15 @@ package edu.byu.cs.tweeter.client.model.net;
 import java.io.IOException;
 
 import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
-import edu.byu.cs.tweeter.model.net.request.FollowRequest;
+import edu.byu.cs.tweeter.model.net.request.TargetUserRequest;
 import edu.byu.cs.tweeter.model.net.request.IsFollowerRequest;
 import edu.byu.cs.tweeter.model.net.request.PagedRequest;
 import edu.byu.cs.tweeter.model.net.request.LoginRequest;
 import edu.byu.cs.tweeter.model.net.request.PostStatusRequest;
 import edu.byu.cs.tweeter.model.net.request.RegisterRequest;
 import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
-import edu.byu.cs.tweeter.model.net.response.IsFollowingResponse;
+import edu.byu.cs.tweeter.model.net.response.BoolResponse;
+import edu.byu.cs.tweeter.model.net.response.IntResponse;
 import edu.byu.cs.tweeter.model.net.response.LoginResponse;
 import edu.byu.cs.tweeter.model.net.response.Response;
 import edu.byu.cs.tweeter.model.net.response.StatusesResponse;
@@ -75,22 +76,47 @@ public class ServerFacade {
      * @param urlPath path to follow endpoint
      * @return basic response
      */
-    public Response follow(FollowRequest request, String urlPath) throws IOException, TweeterRemoteException {
+    public Response follow(TargetUserRequest request, String urlPath) throws IOException, TweeterRemoteException {
         return clientCommunicator.doPost(urlPath, request, null, Response.class);
     }
 
     /**
-     *
+     * Tells whether a user follows another user or not
      * @param request contains current user's authToken and which user to check
      * @param urlPath path to isFollowing endpoint
      * @return whether is a follower or not
      */
-    public IsFollowingResponse isFollower(IsFollowerRequest request, String urlPath) throws IOException, TweeterRemoteException {
-        return clientCommunicator.doPost(urlPath, request, null, IsFollowingResponse.class);
+    public BoolResponse isFollower(IsFollowerRequest request, String urlPath) throws IOException, TweeterRemoteException {
+        return clientCommunicator.doPost(urlPath, request, null, BoolResponse.class);
     }
 
-
+    /**
+     * Posts a status
+     * @param request contains the post's and current user's information
+     * @param urlPath path to the poststatus enpoint
+     * @return basic response
+     */
     public Response postStatus(PostStatusRequest request, String urlPath) throws Exception{
         return clientCommunicator.doPost(urlPath, request, null, Response.class);
+    }
+
+    /**
+     * gets the count of how many users follow someone
+     * @param request contains which user is being queried
+     * @param urlPath path to the getfollowerscount endpoint
+     * @return number of followers
+     */
+    public IntResponse getFollowersCount(TargetUserRequest request, String urlPath) throws Exception{
+        return clientCommunicator.doPost(urlPath, request, null, IntResponse.class);
+    }
+
+    /**
+     * gets the count of how many users follow someone
+     * @param request contains which user is being queried
+     * @param urlPath path to the getfolloweescount endpoint
+     * @return number of followees
+     */
+    public IntResponse getFolloweesCount(TargetUserRequest request, String urlPath) throws Exception{
+        return clientCommunicator.doPost(urlPath, request, null, IntResponse.class);
     }
 }

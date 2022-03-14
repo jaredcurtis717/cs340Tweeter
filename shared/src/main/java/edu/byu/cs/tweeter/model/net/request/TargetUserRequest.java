@@ -5,14 +5,14 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 /**
  * Contains all the information needed to make a follow/unfollow request
  */
-public class FollowRequest {
+public class TargetUserRequest {
     private AuthToken authToken;
     private String user;
 
     /**
      * Allows construction of the object from Json. Private so it won't be called in normal code.
      */
-    private FollowRequest(){}
+    private TargetUserRequest(){}
 
     /**
      * Creates an instance.
@@ -20,7 +20,7 @@ public class FollowRequest {
      * @param authToken authtoken of the current user
      * @param alias of the user to be followed/unfollowed
      */
-    public FollowRequest(AuthToken authToken, String alias) {
+    public TargetUserRequest(AuthToken authToken, String alias) {
         this.authToken = authToken;
         this.user = alias;
     }

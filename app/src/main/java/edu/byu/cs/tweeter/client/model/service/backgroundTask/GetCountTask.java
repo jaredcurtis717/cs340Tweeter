@@ -16,7 +16,7 @@ public abstract class GetCountTask extends AuthenticatedTask {
      */
     private final User targetUser;
 
-    private int count;
+    protected int count;
 
     protected GetCountTask(AuthToken authToken, User targetUser, Handler messageHandler) {
         super(authToken, messageHandler);
@@ -28,16 +28,11 @@ public abstract class GetCountTask extends AuthenticatedTask {
     }
 
     @Override
-    protected void runTask() {
-        count = runCountTask();
-
-        // Call sendSuccessMessage if successful
-        sendSuccessMessage();
-        // or call sendFailedMessage if not successful
-        // sendFailedMessage()
+    protected void runTask() throws Exception {
+            runCountTask();
     }
 
-    protected abstract int runCountTask();
+    protected abstract void runCountTask() throws Exception;
 
     @Override
     protected void loadSuccessBundle(Bundle msgBundle) {

@@ -1,6 +1,6 @@
 package edu.byu.cs.tweeter.model.net.response;
 
-public class IsFollowingResponse extends Response{
+public class BoolResponse extends Response{
     private boolean isFollowing;
 
     /**
@@ -8,7 +8,7 @@ public class IsFollowingResponse extends Response{
      *
      * @param isFollowing if the follower is following the followee
      */
-    public IsFollowingResponse(boolean isFollowing) {
+    public BoolResponse(boolean isFollowing) {
         super(true);
         this.isFollowing = isFollowing;
     }
@@ -18,7 +18,7 @@ public class IsFollowingResponse extends Response{
      *
      * @param message a message describing why the request was unsuccessful.
      */
-    public IsFollowingResponse(String message) {
+    public BoolResponse(String message) {
         super(false, message);
     }
 

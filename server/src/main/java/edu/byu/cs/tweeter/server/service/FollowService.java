@@ -1,12 +1,11 @@
 package edu.byu.cs.tweeter.server.service;
 
-import edu.byu.cs.tweeter.model.net.request.FollowRequest;
+import edu.byu.cs.tweeter.model.net.request.TargetUserRequest;
 import edu.byu.cs.tweeter.model.net.request.IsFollowerRequest;
 import edu.byu.cs.tweeter.model.net.request.PagedRequest;
 import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
-import edu.byu.cs.tweeter.model.net.response.IsFollowingResponse;
+import edu.byu.cs.tweeter.model.net.response.BoolResponse;
 import edu.byu.cs.tweeter.model.net.response.Response;
-import edu.byu.cs.tweeter.model.net.response.StatusesResponse;
 import edu.byu.cs.tweeter.server.dao.FollowDAO;
 
 /**
@@ -50,7 +49,7 @@ public class FollowService {
         return getFollowingDAO().getFollowers(request);
     }
 
-    public Response follow(FollowRequest request) {
+    public Response follow(TargetUserRequest request) {
         if (request.getAuthToken() == null){
             throw new RuntimeException("[BadRequest] invalid authToken");
         } else if(request.getUser() == null) {
@@ -61,7 +60,7 @@ public class FollowService {
         return new Response(true, null);
     }
 
-    public Response unfollow(FollowRequest request) {
+    public Response unfollow(TargetUserRequest request) {
         if (request.getAuthToken() == null){
             throw new RuntimeException("[BadRequest] invalid authToken");
         } else if(request.getUser() == null) {
@@ -72,7 +71,7 @@ public class FollowService {
         return new Response(true, null);
     }
 
-    public IsFollowingResponse isFollowing(IsFollowerRequest request) {
+    public BoolResponse isFollowing(IsFollowerRequest request) {
         if (request.getAuthToken() == null){
             throw new RuntimeException("[BadRequest] invalid authToken");
         } else if(request.getFollowee() == null) {
@@ -82,7 +81,7 @@ public class FollowService {
         }
 
         // TODO: Generates dummy data. Replace with a real implementation.
-        return new IsFollowingResponse(true);
+        return new BoolResponse(true);
     }
 
     /**

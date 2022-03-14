@@ -4,7 +4,7 @@ import android.os.Handler;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
-import edu.byu.cs.tweeter.model.net.request.FollowRequest;
+import edu.byu.cs.tweeter.model.net.request.TargetUserRequest;
 import edu.byu.cs.tweeter.model.net.response.Response;
 
 /**
@@ -25,7 +25,7 @@ public class UnfollowTask extends AuthenticatedTask {
 
     @Override
     protected void runTask() throws Exception {
-        FollowRequest request = new FollowRequest(getAuthToken(), followee.getAlias());
+        TargetUserRequest request = new TargetUserRequest(getAuthToken(), followee.getAlias());
 
         Response response = getServerFacade().follow(request, URL_PATH);
 
