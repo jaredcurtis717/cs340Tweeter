@@ -7,11 +7,14 @@ import java.util.Random;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.request.IsFollowerRequest;
+import edu.byu.cs.tweeter.model.net.response.IsFollowingResponse;
 
 /**
  * Background task that determines if one user is following another.
  */
 public class IsFollowerTask extends AuthenticatedTask {
+    private static final String URL_PATH = "/isfollowing";
 
     public static final String IS_FOLLOWER_KEY = "is-follower";
 
@@ -34,13 +37,18 @@ public class IsFollowerTask extends AuthenticatedTask {
     }
 
     @Override
-    protected void runTask() {
-        isFollower = new Random().nextInt() > 0;
+    protected void runTask() throws Exception{
+        isFollower = new Random().nextInt() > 0; //Todo: remove when DB is implemented
 
-        // Call sendSuccessMessage if successful
-        sendSuccessMessage();
-        // or call sendFailedMessage if not successful
-        // sendFailedMessage()
+        IsFollowerRequest request = new IsFollowerRequest(getAuthToken(), follower.getAlias(), followee.getAlias());
+        IsFollowingResponse response = getServerFacade().isFollower(request, URL_PATH);
+
+        if (response.isSuccess()){
+            sendSuccessMessage();
+        }
+        else{
+            sendFailedMessage(response.getMessage());
+        }
     }
 
     @Override

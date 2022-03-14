@@ -1,8 +1,10 @@
 package edu.byu.cs.tweeter.server.service;
 
 import edu.byu.cs.tweeter.model.net.request.FollowRequest;
+import edu.byu.cs.tweeter.model.net.request.IsFollowerRequest;
 import edu.byu.cs.tweeter.model.net.request.PagedRequest;
 import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
+import edu.byu.cs.tweeter.model.net.response.IsFollowingResponse;
 import edu.byu.cs.tweeter.model.net.response.Response;
 import edu.byu.cs.tweeter.model.net.response.StatusesResponse;
 import edu.byu.cs.tweeter.server.dao.FollowDAO;
@@ -68,6 +70,19 @@ public class FollowService {
 
         // TODO: Generates dummy data. Replace with a real implementation.
         return new Response(true, null);
+    }
+
+    public IsFollowingResponse isFollowing(IsFollowerRequest request) {
+        if (request.getAuthToken() == null){
+            throw new RuntimeException("[BadRequest] invalid authToken");
+        } else if(request.getFollowee() == null) {
+            throw new RuntimeException("[BadRequest] Request a followee");
+        } else if(request.getFollower() == null) {
+            throw new RuntimeException("[BadRequest] Request a follower");
+        }
+
+        // TODO: Generates dummy data. Replace with a real implementation.
+        return new IsFollowingResponse(true);
     }
 
     /**
