@@ -7,6 +7,7 @@ import edu.byu.cs.tweeter.model.net.request.FollowRequest;
 import edu.byu.cs.tweeter.model.net.request.IsFollowerRequest;
 import edu.byu.cs.tweeter.model.net.request.PagedRequest;
 import edu.byu.cs.tweeter.model.net.request.LoginRequest;
+import edu.byu.cs.tweeter.model.net.request.PostStatusRequest;
 import edu.byu.cs.tweeter.model.net.request.RegisterRequest;
 import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
 import edu.byu.cs.tweeter.model.net.response.IsFollowingResponse;
@@ -78,7 +79,18 @@ public class ServerFacade {
         return clientCommunicator.doPost(urlPath, request, null, Response.class);
     }
 
+    /**
+     *
+     * @param request contains current user's authToken and which user to check
+     * @param urlPath path to isFollowing endpoint
+     * @return whether is a follower or not
+     */
     public IsFollowingResponse isFollower(IsFollowerRequest request, String urlPath) throws IOException, TweeterRemoteException {
         return clientCommunicator.doPost(urlPath, request, null, IsFollowingResponse.class);
+    }
+
+
+    public Response postStatus(PostStatusRequest request, String urlPath) throws Exception{
+        return clientCommunicator.doPost(urlPath, request, null, Response.class);
     }
 }

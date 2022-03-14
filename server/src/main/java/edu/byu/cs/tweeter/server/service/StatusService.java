@@ -1,6 +1,8 @@
 package edu.byu.cs.tweeter.server.service;
 
 import edu.byu.cs.tweeter.model.net.request.PagedRequest;
+import edu.byu.cs.tweeter.model.net.request.PostStatusRequest;
+import edu.byu.cs.tweeter.model.net.response.Response;
 import edu.byu.cs.tweeter.model.net.response.StatusesResponse;
 import edu.byu.cs.tweeter.server.dao.FollowDAO;
 import edu.byu.cs.tweeter.server.dao.GetStatusesDAO;
@@ -46,6 +48,16 @@ public class StatusService {
         return getStatusesDAO().getStory(request);
     }
 
+    public Response postStatus(PostStatusRequest request) {
+        if(request.getAuthToken() == null) {
+            throw new RuntimeException("[BadRequest] invalid authToken");
+        } else if(request.getStatus() == null) {
+            throw new RuntimeException("[BadRequest] Request needs to have a status to post");
+        }
+
+        return new Response(true);
+    }
+
     /**
      * Returns an instance of {@link FollowDAO}. Allows mocking of the FollowDAO class
      * for testing purposes. All usages of FollowDAO should get their FollowDAO
@@ -56,4 +68,6 @@ public class StatusService {
     GetStatusesDAO getStatusesDAO() {
         return new GetStatusesDAO();
     }
+
+
 }

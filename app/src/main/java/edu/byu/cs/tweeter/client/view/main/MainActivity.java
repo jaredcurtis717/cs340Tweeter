@@ -309,7 +309,9 @@ public class MainActivity extends AppCompatActivity implements StatusDialogFragm
 
     @Override
     public void displayInfoMessage(String message) {
-        infoMessage.cancel();
+        if(infoMessage != null){
+            infoMessage.cancel();
+        }
         infoMessage = Toast.makeText(MainActivity.this, message, Toast.LENGTH_LONG);
         infoMessage.show();
     }
