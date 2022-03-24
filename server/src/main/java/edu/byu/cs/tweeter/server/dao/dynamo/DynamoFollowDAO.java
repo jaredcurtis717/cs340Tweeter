@@ -1,4 +1,4 @@
-package edu.byu.cs.tweeter.server.dao;
+package edu.byu.cs.tweeter.server.dao.dynamo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,12 +6,13 @@ import java.util.List;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.PagedRequest;
 import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
+import edu.byu.cs.tweeter.server.dao.interfaces.FollowDAO;
 import edu.byu.cs.tweeter.util.FakeData;
 
 /**
  * A DAO for accessing 'following' data from the database.
  */
-public class FollowDAO {
+public class DynamoFollowDAO implements FollowDAO {
 
     /**
      * Gets the count of users from the database that the user specified is following. The

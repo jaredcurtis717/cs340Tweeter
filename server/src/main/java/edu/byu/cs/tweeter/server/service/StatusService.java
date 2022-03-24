@@ -4,8 +4,8 @@ import edu.byu.cs.tweeter.model.net.request.PagedRequest;
 import edu.byu.cs.tweeter.model.net.request.PostStatusRequest;
 import edu.byu.cs.tweeter.model.net.response.Response;
 import edu.byu.cs.tweeter.model.net.response.StatusesResponse;
-import edu.byu.cs.tweeter.server.dao.FollowDAO;
-import edu.byu.cs.tweeter.server.dao.GetStatusesDAO;
+import edu.byu.cs.tweeter.server.dao.dynamo.DynamoFollowDAO;
+import edu.byu.cs.tweeter.server.dao.dynamo.DynamoStatusDAO;
 
 /**
  * Contains the business logic for getting the users a user is following.
@@ -15,7 +15,7 @@ public class StatusService {
     /**
      * Returns the feed of the given user. Uses information in
      * the request object to limit the number of statuses returned and to return the next set of
-     * followees after any that were returned in a previous request. Uses the {@link FollowDAO} to
+     * followees after any that were returned in a previous request. Uses the {@link DynamoFollowDAO} to
      * get the followees.
      *
      * @param request contains the data required to fulfill the request.
@@ -33,7 +33,7 @@ public class StatusService {
     /**
      * Returns the story of the given user. Uses information in
      * the request object to limit the number of followers returned and to return the next set of
-     * followers after any that were returned in a previous request. Uses the {@link FollowDAO} to
+     * followers after any that were returned in a previous request. Uses the {@link DynamoFollowDAO} to
      * get the followers.
      *
      * @param request contains the data required to fulfill the request.
@@ -60,14 +60,14 @@ public class StatusService {
     }
 
     /**
-     * Returns an instance of {@link FollowDAO}. Allows mocking of the FollowDAO class
+     * Returns an instance of {@link DynamoFollowDAO}. Allows mocking of the FollowDAO class
      * for testing purposes. All usages of FollowDAO should get their FollowDAO
      * instance from this method to allow for mocking of the instance.
      *
      * @return the instance.
      */
-    GetStatusesDAO getStatusesDAO() {
-        return new GetStatusesDAO();
+    DynamoStatusDAO getStatusesDAO() {
+        return new DynamoStatusDAO();
     }
 
 

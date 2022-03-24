@@ -1,4 +1,4 @@
-package edu.byu.cs.tweeter.server.dao;
+package edu.byu.cs.tweeter.server.dao.dynamo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,9 +6,10 @@ import java.util.List;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.net.request.PagedRequest;
 import edu.byu.cs.tweeter.model.net.response.StatusesResponse;
+import edu.byu.cs.tweeter.server.dao.interfaces.StatusDAO;
 import edu.byu.cs.tweeter.util.FakeData;
 
-public class GetStatusesDAO {
+public class DynamoStatusDAO implements StatusDAO {
     /**
      * Gets the statuses in a users story. Uses
      * information in the request object to limit the number of statuses returned and to return the
@@ -105,7 +106,7 @@ public class GetStatusesDAO {
      *
      * @return the followees.
      */
-    List<Status> getDummyStatuses() {
+    private List<Status> getDummyStatuses() {
         return getFakeData().getFakeStatuses();
     }
 
@@ -115,7 +116,7 @@ public class GetStatusesDAO {
      *
      * @return a {@link FakeData} instance.
      */
-    FakeData getFakeData() {
+    private FakeData getFakeData() {
         return new FakeData();
     }
 }
