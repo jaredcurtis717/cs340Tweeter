@@ -6,12 +6,20 @@ import edu.byu.cs.tweeter.model.net.request.TargetUserRequest;
 import edu.byu.cs.tweeter.model.net.response.BoolResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
 import edu.byu.cs.tweeter.model.net.response.Response;
+import edu.byu.cs.tweeter.server.dao.DAOFactory;
 import edu.byu.cs.tweeter.server.dao.dynamo.DynamoFollowDAO;
+import edu.byu.cs.tweeter.server.dao.interfaces.FollowDAO;
 
 /**
  * Contains the business logic for getting the users a user is following.
  */
 public class FollowService {
+
+    private DAOFactory daoFactory;
+
+    public FollowService(DAOFactory daoFactory){
+        this.daoFactory = daoFactory;
+    }
 
     /**
      * Returns the users that the user specified in the request is following. Uses information in
@@ -91,8 +99,8 @@ public class FollowService {
      *
      * @return the instance.
      */
-    DynamoFollowDAO getFollowingDAO() {
-        return new DynamoFollowDAO();
+    FollowDAO getFollowingDAO() {
+        return daoFactory.getFollowDao();
     }
 
 
