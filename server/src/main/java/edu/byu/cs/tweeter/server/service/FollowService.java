@@ -1,5 +1,9 @@
 package edu.byu.cs.tweeter.server.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.IsFollowerRequest;
 import edu.byu.cs.tweeter.model.net.request.PagedRequest;
 import edu.byu.cs.tweeter.model.net.request.TargetUserRequest;
@@ -9,13 +13,15 @@ import edu.byu.cs.tweeter.model.net.response.Response;
 import edu.byu.cs.tweeter.server.dao.DAOFactory;
 import edu.byu.cs.tweeter.server.dao.dynamo.DynamoFollowDAO;
 import edu.byu.cs.tweeter.server.dao.interfaces.FollowDAO;
+import edu.byu.cs.tweeter.server.dao.interfaces.UserDAO;
+import edu.byu.cs.tweeter.util.ResultsPage;
 
 /**
  * Contains the business logic for getting the users a user is following.
  */
 public class FollowService {
 
-    private DAOFactory daoFactory;
+    private final DAOFactory daoFactory;
 
     public FollowService(DAOFactory daoFactory){
         this.daoFactory = daoFactory;
@@ -36,7 +42,17 @@ public class FollowService {
         } else if(request.getLimit() <= 0) {
             throw new RuntimeException("[BadRequest] Request needs to have a positive limit");
         }
-        return getFollowingDAO().getFollowees(request);
+        //TODO authenticate
+        ResultsPage resultsPage = getFollowDAO().getFollowees(request);
+        List<User> followeeUsers = new ArrayList<>();
+
+        UserDAO userDAO = getUserDAO();
+
+        for(String followeeHandle : resultsPage.getValues()){
+            followeeUsers.add(userDAO.getUser(followeeHandle));
+        }
+
+        return new FollowingResponse(followeeUsers, resultsPage.hasLastKey());
     }
 
     /**
@@ -54,7 +70,7 @@ public class FollowService {
         } else if(request.getLimit() <= 0) {
             throw new RuntimeException("[BadRequest] Request needs to have a positive limit");
         }
-        return getFollowingDAO().getFollowers(request);
+        return getFollowDAO().getFollowers(request);
     }
 
     public Response follow(TargetUserRequest request) {
@@ -99,10 +115,12 @@ public class FollowService {
      *
      * @return the instance.
      */
-    FollowDAO getFollowingDAO() {
+    FollowDAO getFollowDAO() {
         return daoFactory.getFollowDao();
     }
 
-
+    UserDAO getUserDAO(){
+        return daoFactory.getUserDAO();
+    }
 
 }

@@ -1,18 +1,40 @@
 package edu.byu.cs.tweeter.server.dao.dynamo;
 
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
+import com.amazonaws.services.dynamodbv2.document.DynamoDB;
+import com.amazonaws.services.dynamodbv2.model.AttributeValue;
+import com.amazonaws.services.dynamodbv2.model.QueryRequest;
+import com.amazonaws.services.dynamodbv2.model.QueryResult;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.PagedRequest;
 import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
 import edu.byu.cs.tweeter.server.dao.interfaces.FollowDAO;
 import edu.byu.cs.tweeter.util.FakeData;
+import edu.byu.cs.tweeter.util.ResultsPage;
 
 /**
  * A DAO for accessing 'following' data from the database.
  */
 public class DynamoFollowDAO implements FollowDAO {
+
+    private static String followsTableName = "follows";
+
+    private static final String followerAttribute = "follower_handle";
+    private static final String followeeAttribute = "followee_handle";
+
+    // DynamoDB client
+    private static final AmazonDynamoDB amazonDynamoDB = AmazonDynamoDBClientBuilder
+            .standard()
+            .withRegion("us-west-2")
+            .build();
+    private static final DynamoDB dynamoDB = new DynamoDB(amazonDynamoDB);
 
     /**
      * Gets the count of users from the database that the user specified is following. The
@@ -30,15 +52,59 @@ public class DynamoFollowDAO implements FollowDAO {
     /**
      * Gets the users from the database that the user specified in the request is following. Uses
      * information in the request object to limit the number of followees returned and to return the
-     * next set of followees after any that were returned in a previous request. The current
-     * implementation returns generated data and doesn't actually access a database.
+     * next set of followees after any that were returned in a previous request.
      *
      * @param request contains information about the user whose followees are to be returned and any
      *                other information required to satisfy the request.
      * @return the followees.
      */
-    public FollowingResponse getFollowees(PagedRequest request) {
-        // TODO: Generates dummy data. Replace with a real implementation.
+    public ResultsPage getFollowees(PagedRequest request) {
+
+        System.out.println(request.getAlias() + " = alias \n" +
+                request.getLastItem() + " = last item");
+
+        Map<String, String> attrNames = new HashMap<>();
+        attrNames.put("#fol", followerAttribute);
+
+        Map<String, AttributeValue> attrValues = new HashMap<>();
+        attrValues.put(":follower", new AttributeValue().withS(request.getAlias()));
+
+        QueryRequest queryRequest = new QueryRequest()
+                .withTableName(followsTableName)
+                .withKeyConditionExpression("#fol = :follower")
+                .withExpressionAttributeNames(attrNames)
+                .withExpressionAttributeValues(attrValues)
+                .withLimit(request.getLimit());
+
+        if (isNonEmptyString(request.getLastItem())) {
+            Map<String, AttributeValue> startKey = new HashMap<>();
+            startKey.put(followerAttribute, new AttributeValue().withS(request.getAlias()));
+            startKey.put(followeeAttribute, new AttributeValue().withS(request.getLastItem()));
+
+            queryRequest = queryRequest.withExclusiveStartKey(startKey);
+        }
+
+        QueryResult queryResult = amazonDynamoDB.query(queryRequest);
+
+        ResultsPage resultsPage = new ResultsPage();
+
+        List<Map<String, AttributeValue>> items = queryResult.getItems();
+        System.out.println("items = " + items.toString());
+
+        for (Map<String, AttributeValue> item : items){
+            String followeeHandle = item.get(followeeAttribute).getS();
+            resultsPage.addValue(followeeHandle);
+        }
+
+        Map<String, AttributeValue> lastKey = queryResult.getLastEvaluatedKey();
+        if (lastKey != null) {
+            resultsPage.setLastKey(lastKey.get(followeeAttribute).getS());
+        }
+
+        return resultsPage;
+
+        /*
+        // old dummy data response
         assert request.getLimit() > 0;
         assert request.getAlias() != null;
 
@@ -60,6 +126,12 @@ public class DynamoFollowDAO implements FollowDAO {
         }
 
         return new FollowingResponse(responseFollowees, hasMorePages);
+
+         */
+    }
+
+    private static boolean isNonEmptyString(String value) {
+        return (value != null && value.length() > 0);
     }
 
     /**

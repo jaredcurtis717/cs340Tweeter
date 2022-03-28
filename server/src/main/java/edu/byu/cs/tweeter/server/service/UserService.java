@@ -10,21 +10,45 @@ import edu.byu.cs.tweeter.model.net.response.IntResponse;
 import edu.byu.cs.tweeter.model.net.response.LoginResponse;
 import edu.byu.cs.tweeter.model.net.response.Response;
 import edu.byu.cs.tweeter.model.net.response.UserResponse;
+import edu.byu.cs.tweeter.server.dao.DAOFactory;
+import edu.byu.cs.tweeter.server.dao.interfaces.UserDAO;
 import edu.byu.cs.tweeter.util.FakeData;
 
 public class UserService {
 
+    private final DAOFactory daoFactory;
+
+    public UserService(DAOFactory daoFactory){
+        this.daoFactory = daoFactory;
+    }
+
     public LoginResponse login(LoginRequest request) {
+        System.out.println("Received request: " + request.toString());
+
         if(request.getUsername() == null){
             throw new RuntimeException("[BadRequest] Missing a username");
         } else if(request.getPassword() == null) {
             throw new RuntimeException("[BadRequest] Missing a password");
         }
+        //TODO checkPassword
+        User user = getUserDAO().getUser(request.getUsername());
 
-        // TODO: Generates dummy data. Replace with a real implementation.
+        //TODO replace dummy authToken
+        AuthToken authToken = getDummyAuthToken();
+
+        System.out.println("User is: " + user.toString());
+
+        if(user == null){
+            throw new RuntimeException("[BadRequest] invalid username/password");
+        }
+
+        return new LoginResponse(user, authToken);
+        /*
+        // old dummy implementation
         User user = getDummyUser();
         AuthToken authToken = getDummyAuthToken();
         return new LoginResponse(user, authToken);
+         */
     }
 
     public Response logout(AuthTokenRequest request) {
@@ -118,6 +142,8 @@ public class UserService {
         return new FakeData();
     }
 
-
+    UserDAO getUserDAO(){
+        return daoFactory.getUserDAO();
+    }
 
 }

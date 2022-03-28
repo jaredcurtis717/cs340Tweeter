@@ -5,6 +5,7 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 
 import edu.byu.cs.tweeter.model.net.request.AuthTokenRequest;
 import edu.byu.cs.tweeter.model.net.response.Response;
+import edu.byu.cs.tweeter.server.dao.dynamo.DynamoDAOFactory;
 import edu.byu.cs.tweeter.server.service.UserService;
 
 public class LogoutHandler implements RequestHandler<AuthTokenRequest, Response> {
@@ -17,7 +18,7 @@ public class LogoutHandler implements RequestHandler<AuthTokenRequest, Response>
      */
     @Override
     public Response handleRequest(AuthTokenRequest input, Context context) {
-        UserService userService = new UserService();
+        UserService userService = new UserService(new DynamoDAOFactory());
         return userService.logout(input);
     }
 }
