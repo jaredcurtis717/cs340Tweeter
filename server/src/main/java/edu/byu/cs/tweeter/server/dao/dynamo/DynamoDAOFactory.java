@@ -1,6 +1,7 @@
 package edu.byu.cs.tweeter.server.dao.dynamo;
 
 import edu.byu.cs.tweeter.server.dao.DAOFactory;
+import edu.byu.cs.tweeter.server.dao.interfaces.AuthtokenDAO;
 import edu.byu.cs.tweeter.server.dao.interfaces.FollowDAO;
 import edu.byu.cs.tweeter.server.dao.interfaces.StatusDAO;
 import edu.byu.cs.tweeter.server.dao.interfaces.UserDAO;
@@ -19,5 +20,10 @@ public class DynamoDAOFactory implements DAOFactory {
     @Override
     public UserDAO getUserDAO() {
         return new DynamoUserDAO();
+    }
+
+    @Override
+    public AuthtokenDAO getAuthtokenDAO() {
+        return new DynamoAuthtokenDAO();
     }
 }

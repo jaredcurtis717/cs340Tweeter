@@ -14,6 +14,7 @@ import edu.byu.cs.tweeter.server.dao.DAOFactory;
 import edu.byu.cs.tweeter.server.dao.dynamo.DynamoFollowDAO;
 import edu.byu.cs.tweeter.server.dao.interfaces.FollowDAO;
 import edu.byu.cs.tweeter.server.dao.interfaces.UserDAO;
+import edu.byu.cs.tweeter.util.DataAccessException;
 import edu.byu.cs.tweeter.util.ResultsPage;
 
 /**
@@ -49,7 +50,11 @@ public class FollowService {
         UserDAO userDAO = getUserDAO();
 
         for(String followeeHandle : resultsPage.getValues()){
-            followeeUsers.add(userDAO.getUser(followeeHandle));
+            try{
+                followeeUsers.add(userDAO.getUser(followeeHandle));
+            } catch (DataAccessException e) {
+                return new FollowingResponse(e.getMessage());
+            }
         }
 
         return new FollowingResponse(followeeUsers, resultsPage.hasLastKey());

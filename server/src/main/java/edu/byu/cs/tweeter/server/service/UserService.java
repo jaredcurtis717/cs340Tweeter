@@ -1,5 +1,14 @@
 package edu.byu.cs.tweeter.server.service;
 
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.SdkClientException;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.dynamodbv2.xspec.L;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+
+import java.util.UUID;
+
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.AuthTokenRequest;
@@ -11,7 +20,9 @@ import edu.byu.cs.tweeter.model.net.response.LoginResponse;
 import edu.byu.cs.tweeter.model.net.response.Response;
 import edu.byu.cs.tweeter.model.net.response.UserResponse;
 import edu.byu.cs.tweeter.server.dao.DAOFactory;
+import edu.byu.cs.tweeter.server.dao.interfaces.AuthtokenDAO;
 import edu.byu.cs.tweeter.server.dao.interfaces.UserDAO;
+import edu.byu.cs.tweeter.util.DataAccessException;
 import edu.byu.cs.tweeter.util.FakeData;
 
 public class UserService {
@@ -31,12 +42,16 @@ public class UserService {
             throw new RuntimeException("[BadRequest] Missing a password");
         }
         //TODO checkPassword
-        User user = getUserDAO().getUser(request.getUsername());
 
-        //TODO replace dummy authToken
-        AuthToken authToken = getDummyAuthToken();
+        User user;
+        try{
+            user = getUserDAO().getUser(request.getUsername());
+        } catch (DataAccessException e) {
+            return new LoginResponse(e.getMessage());
+        }
 
-        System.out.println("User is: " + user.toString());
+
+        AuthToken authToken = getAuthtokenDAO().newAuthtoken();
 
         if(user == null){
             throw new RuntimeException("[BadRequest] invalid username/password");
@@ -72,11 +87,30 @@ public class UserService {
             throw new RuntimeException("[BadRequest] Missing an image");
         }
 
+        User newUser;
+        AuthToken authtoken;
+        try{
+            //expecting an exception letting us know the user doesn't exist
+            User userShouldNotExist = getUserDAO().getUser(request.getUsername());
+            throw new RuntimeException("[BadRequest] user already exists");
+        }catch (Exception ignored){
+        }
 
-        // TODO: Generates dummy data. Replace with a real implementation.
+        try{
+            newUser = getUserDAO().registerUser(request);
+            authtoken = getAuthtokenDAO().newAuthtoken();
+        }catch (Exception ex){
+            return new LoginResponse(ex.getMessage());
+        }
+
+        return new LoginResponse(newUser, authtoken);
+
+        /*
+        // old fake data implementation
         User user = getDummyUser();
         AuthToken authToken = getDummyAuthToken();
         return new LoginResponse(user, authToken);
+         */
     }
 
     public IntResponse getFollowerCount(TargetUserRequest request) {
@@ -144,6 +178,10 @@ public class UserService {
 
     UserDAO getUserDAO(){
         return daoFactory.getUserDAO();
+    }
+
+    AuthtokenDAO getAuthtokenDAO(){
+        return daoFactory.getAuthtokenDAO();
     }
 
 }

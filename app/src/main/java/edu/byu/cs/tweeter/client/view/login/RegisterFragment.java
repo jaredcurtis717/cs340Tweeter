@@ -69,7 +69,9 @@ public class RegisterFragment extends Fragment implements RegisterPresenter.View
 
     @Override
     public void clearInfoMessage() {
-        infoMessage.cancel();
+        if (infoMessage != null){
+            infoMessage.cancel();
+        }
     }
 
     @Override
