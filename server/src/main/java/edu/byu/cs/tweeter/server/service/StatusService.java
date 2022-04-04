@@ -4,6 +4,7 @@ import edu.byu.cs.tweeter.model.net.request.PagedRequest;
 import edu.byu.cs.tweeter.model.net.request.PostStatusRequest;
 import edu.byu.cs.tweeter.model.net.response.Response;
 import edu.byu.cs.tweeter.model.net.response.StatusesResponse;
+import edu.byu.cs.tweeter.server.dao.dynamo.DynamoAuthtokenDAO;
 import edu.byu.cs.tweeter.server.dao.dynamo.DynamoFollowDAO;
 import edu.byu.cs.tweeter.server.dao.dynamo.DynamoStatusDAO;
 
@@ -45,6 +46,7 @@ public class StatusService {
         } else if(request.getLimit() <= 0) {
             throw new RuntimeException("[BadRequest] Request needs to have a positive limit");
         }
+        getAuthtokenDAO().validate(request.getAuthToken());
         return getStatusesDAO().getStory(request);
     }
 
@@ -70,5 +72,5 @@ public class StatusService {
         return new DynamoStatusDAO();
     }
 
-
+    DynamoAuthtokenDAO getAuthtokenDAO(){return new DynamoAuthtokenDAO();}
 }

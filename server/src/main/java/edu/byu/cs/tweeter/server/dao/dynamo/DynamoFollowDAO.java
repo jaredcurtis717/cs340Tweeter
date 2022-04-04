@@ -24,7 +24,8 @@ import edu.byu.cs.tweeter.util.ResultsPage;
  */
 public class DynamoFollowDAO implements FollowDAO {
 
-    private static String followsTableName = "follows";
+    private static final String followsTableName = "follows";
+    private static final String followsTableIndexName = "follows_index";
 
     private static final String followerAttribute = "follower_handle";
     private static final String followeeAttribute = "followee_handle";
@@ -144,8 +145,54 @@ public class DynamoFollowDAO implements FollowDAO {
      *                other information required to satisfy the request.
      * @return the followers.
      */
-    public FollowingResponse getFollowers(PagedRequest request) {
-        // TODO: Generates dummy data. Replace with a real implementation.
+    public ResultsPage getFollowers(PagedRequest request) {
+        System.out.println(request.getAlias() + " = alias \n" +
+                request.getLastItem() + " = last item");
+
+        Map<String, String> attrNames = new HashMap<>();
+        attrNames.put("#fol", followeeAttribute);
+
+        Map<String, AttributeValue> attrValues = new HashMap<>();
+        attrValues.put(":followee", new AttributeValue().withS(request.getAlias()));
+
+        QueryRequest queryRequest = new QueryRequest()
+                .withTableName(followsTableName)
+                .withIndexName(followsTableIndexName)
+                .withKeyConditionExpression("#fol = :followee")
+                .withExpressionAttributeNames(attrNames)
+                .withExpressionAttributeValues(attrValues)
+                .withLimit(request.getLimit());
+
+        if (isNonEmptyString(request.getLastItem())) {
+            Map<String, AttributeValue> startKey = new HashMap<>();
+            startKey.put(followeeAttribute, new AttributeValue().withS(request.getAlias()));
+            startKey.put(followerAttribute, new AttributeValue().withS(request.getLastItem()));
+
+            queryRequest = queryRequest.withExclusiveStartKey(startKey);
+        }
+
+        QueryResult queryResult = amazonDynamoDB.query(queryRequest);
+
+        ResultsPage resultsPage = new ResultsPage();
+
+        List<Map<String, AttributeValue>> items = queryResult.getItems();
+        System.out.println("items = " + items.toString());
+
+        for (Map<String, AttributeValue> item : items){
+            String followerHandle = item.get(followerAttribute).getS();
+            resultsPage.addValue(followerHandle);
+        }
+
+
+        Map<String, AttributeValue> lastKey = queryResult.getLastEvaluatedKey();
+        if (lastKey != null) {
+            resultsPage.setLastKey(lastKey.get(followerAttribute).getS());
+        }
+
+        return resultsPage;
+
+        //old dummy data implementation
+        /*
         assert request.getLimit() > 0;
         assert request.getAlias() != null;
 
@@ -165,8 +212,9 @@ public class DynamoFollowDAO implements FollowDAO {
                 hasMorePages = followeesIndex < allFollowees.size();
             }
         }
-
         return new FollowingResponse(responseFollowees, hasMorePages);
+        */
+
     }
 
     /**

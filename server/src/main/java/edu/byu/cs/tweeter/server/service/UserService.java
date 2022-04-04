@@ -41,15 +41,13 @@ public class UserService {
         } else if(request.getPassword() == null) {
             throw new RuntimeException("[BadRequest] Missing a password");
         }
-        //TODO checkPassword
 
         User user;
         try{
-            user = getUserDAO().getUser(request.getUsername());
-        } catch (DataAccessException e) {
+            user = getUserDAO().login(request);
+        } catch (Exception e) {
             return new LoginResponse(e.getMessage());
         }
-
 
         AuthToken authToken = getAuthtokenDAO().newAuthtoken();
 
@@ -70,7 +68,13 @@ public class UserService {
         if (request.getAuthToken() == null){
             throw new RuntimeException("[BadRequest] invalid authToken");
         }
-        // TODO: Generates dummy data. Replace with a real implementation.
+        try{
+
+            getAuthtokenDAO().removeToken(request);
+        } catch (DataAccessException e) {
+            throw new RuntimeException("[BadRequest] Unable to delete authtoken");
+        }
+
         return new Response(true);
     }
 
@@ -89,12 +93,17 @@ public class UserService {
 
         User newUser;
         AuthToken authtoken;
+        User userShouldNotExist = null;
         try{
             //expecting an exception letting us know the user doesn't exist
-            User userShouldNotExist = getUserDAO().getUser(request.getUsername());
-            throw new RuntimeException("[BadRequest] user already exists");
+             userShouldNotExist = getUserDAO().getUser(request.getUsername());
         }catch (Exception ignored){
         }
+
+        if (userShouldNotExist != null){
+            throw new RuntimeException("[BadRequest] user already exists");
+        }
+        System.out.println("User doesn't exist, creating new user");
 
         try{
             newUser = getUserDAO().registerUser(request);
@@ -142,8 +151,17 @@ public class UserService {
             throw new RuntimeException("[BadRequest] missing user");
         }
 
-        // TODO: Generates dummy data. Replace with a real implementation.
-        return new UserResponse(getFakeData().findUserByAlias(request.getUser()));
+        getAuthtokenDAO().validate(request.getAuthToken());
+
+        User answerUser;
+        try{
+            answerUser = getUserDAO().getUser(request.getUser());
+        } catch (DataAccessException e) {
+            e.printStackTrace();
+            throw new RuntimeException("[BadRequest] failed to get user");
+        }
+
+        return new UserResponse(answerUser);
     }
 
     /**

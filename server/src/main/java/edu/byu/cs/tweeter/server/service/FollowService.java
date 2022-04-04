@@ -12,6 +12,7 @@ import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
 import edu.byu.cs.tweeter.model.net.response.Response;
 import edu.byu.cs.tweeter.server.dao.DAOFactory;
 import edu.byu.cs.tweeter.server.dao.dynamo.DynamoFollowDAO;
+import edu.byu.cs.tweeter.server.dao.interfaces.AuthtokenDAO;
 import edu.byu.cs.tweeter.server.dao.interfaces.FollowDAO;
 import edu.byu.cs.tweeter.server.dao.interfaces.UserDAO;
 import edu.byu.cs.tweeter.util.DataAccessException;
@@ -43,7 +44,8 @@ public class FollowService {
         } else if(request.getLimit() <= 0) {
             throw new RuntimeException("[BadRequest] Request needs to have a positive limit");
         }
-        //TODO authenticate
+        getAuthtokenDAO().validate(request.getAuthToken());
+
         ResultsPage resultsPage = getFollowDAO().getFollowees(request);
         List<User> followeeUsers = new ArrayList<>();
 
@@ -75,7 +77,22 @@ public class FollowService {
         } else if(request.getLimit() <= 0) {
             throw new RuntimeException("[BadRequest] Request needs to have a positive limit");
         }
-        return getFollowDAO().getFollowers(request);
+        getAuthtokenDAO().validate(request.getAuthToken());
+
+        ResultsPage resultsPage = getFollowDAO().getFollowers(request);
+        List<User> followerUsers = new ArrayList<>();
+
+        UserDAO userDAO = getUserDAO();
+
+        for(String followerHandle : resultsPage.getValues()){
+            try{
+                followerUsers.add(userDAO.getUser(followerHandle));
+            } catch (DataAccessException e) {
+                return new FollowingResponse(e.getMessage());
+            }
+        }
+
+        return new FollowingResponse(followerUsers, resultsPage.hasLastKey());
     }
 
     public Response follow(TargetUserRequest request) {
@@ -127,5 +144,7 @@ public class FollowService {
     UserDAO getUserDAO(){
         return daoFactory.getUserDAO();
     }
+
+    AuthtokenDAO getAuthtokenDAO(){return daoFactory.getAuthtokenDAO();}
 
 }

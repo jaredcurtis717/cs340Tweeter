@@ -10,10 +10,8 @@ import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.S3Object;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -30,6 +28,7 @@ import java.util.Base64;
 import java.util.UUID;
 
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.request.LoginRequest;
 import edu.byu.cs.tweeter.model.net.request.RegisterRequest;
 import edu.byu.cs.tweeter.server.dao.interfaces.UserDAO;
 import edu.byu.cs.tweeter.util.DataAccessException;
@@ -44,6 +43,8 @@ public class DynamoUserDAO implements UserDAO {
     private static final DynamoDB dynamoDB = new DynamoDB(amazonDynamoDB);
 
     private static final String tableName = "user";
+    private static final String passwordTableName = "tweeterpasswords";
+
     private static final String alias = "alias";
     private static final String firstName = "first_name";
     private static final String lastName = "last_name";
@@ -61,6 +62,7 @@ public class DynamoUserDAO implements UserDAO {
             throw new RuntimeException("[BadRequest] user doesn't exist");
         }
 
+        System.out.println("Found user: " + item.toString());
         return new User(item.getString(firstName), item.getString(lastName), userHandle, item.getString(image));
     }
 
@@ -68,25 +70,35 @@ public class DynamoUserDAO implements UserDAO {
     public User registerUser(RegisterRequest request) throws DataAccessException {
         System.out.println("Putting new user: " + request.getUsername());
         Table table = dynamoDB.getTable(tableName);
-        String salty = getSalt();
-
-        System.out.println("Got table and salty");
 
         String imageURLKey = uploadS3(request.getImage());
         String imageURL = s3Client.getUrl(bucketName, imageURLKey).toString();
 
         System.out.println("uploaded image");
 
+        String salty = getSalt();
+        String securePassword = getSecurePassword(request.getPassword(), salty);
+
         Item item = new Item()
                 .withPrimaryKey(alias, request.getUsername())
                 .withString(firstName, request.getFirstName())
                 .withString(lastName, request.getLastName())
-                .withString(image, imageURL)
                 .withString(salt, salty)
-                .withString(password, getSecurePassword(request.getPassword(), salty));
+                .withString(image, imageURL);
 
         System.out.println(item.toString());
         table.putItem(item);
+        System.out.println("User uploaded");
+
+        Table passwordTable = dynamoDB.getTable(passwordTableName);
+        System.out.println("Switch to password table");
+        item = new Item()
+                .withPrimaryKey(alias, request.getUsername(), password, securePassword);
+        System.out.println("Created password item");
+        passwordTable.putItem(item);
+
+        System.out.println("Password uploaded");
+
         User returnUser = new User(request.getFirstName(), request.getLastName(), request.getUsername(), imageURL);
 
         System.out.println("registerUser returning: " + returnUser.toString());
@@ -94,7 +106,28 @@ public class DynamoUserDAO implements UserDAO {
         return returnUser;
     }
 
+    @Override
+    public User login(LoginRequest request) throws DataAccessException {
+        Table table = dynamoDB.getTable(tableName);
 
+        Item item = table.getItem(alias, request.getUsername());
+
+        if (item == null){
+            throw new RuntimeException("[BadRequest] user doesn't exist");
+        }
+
+        Table passwordTable = dynamoDB.getTable(passwordTableName);
+
+        String userSalt = item.getString(salt);
+        String passwordToCheck = getSecurePassword(request.getPassword(), userSalt);
+
+        Item passItem = passwordTable.getItem(alias, request.getUsername(), password, passwordToCheck);
+        if (passItem == null){
+            throw new RuntimeException("[BadRequest] invalid username/password");
+        }
+
+        return new User(item.getString(firstName), item.getString(lastName), item.getString(alias), item.getString(image));
+    }
 
     Regions clientRegion = Regions.US_WEST_2;
     AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
@@ -121,7 +154,7 @@ public class DynamoUserDAO implements UserDAO {
         return stringObjKeyName;
     }
 
-    private String downLoadS3(String key) throws DataAccessException {
+    /*private String downLoadS3(String key) throws DataAccessException {
         S3Object fullObject;
         String userImage;
         try {
@@ -135,7 +168,8 @@ public class DynamoUserDAO implements UserDAO {
             throw new DataAccessException("Failed to download image");
         }
         return userImage;
-    }
+    }*/
+
     private String inputStreamToString(InputStream inputStream){
         StringBuilder textBuilder = new StringBuilder();
         try (Reader reader = new BufferedReader(new InputStreamReader

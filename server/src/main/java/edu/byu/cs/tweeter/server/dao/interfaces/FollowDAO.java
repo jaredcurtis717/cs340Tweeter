@@ -10,5 +10,5 @@ import edu.byu.cs.tweeter.util.ResultsPage;
 public interface FollowDAO {
     public Integer getFolloweeCount(User follower);
     public ResultsPage getFollowees(PagedRequest request);
-    public FollowingResponse getFollowers(PagedRequest request);
+    public ResultsPage getFollowers(PagedRequest request);
 }
