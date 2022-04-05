@@ -13,6 +13,7 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.AuthTokenRequest;
 import edu.byu.cs.tweeter.model.net.request.LoginRequest;
+import edu.byu.cs.tweeter.model.net.request.PagedRequest;
 import edu.byu.cs.tweeter.model.net.request.RegisterRequest;
 import edu.byu.cs.tweeter.model.net.request.TargetUserRequest;
 import edu.byu.cs.tweeter.model.net.response.IntResponse;
@@ -21,9 +22,11 @@ import edu.byu.cs.tweeter.model.net.response.Response;
 import edu.byu.cs.tweeter.model.net.response.UserResponse;
 import edu.byu.cs.tweeter.server.dao.DAOFactory;
 import edu.byu.cs.tweeter.server.dao.interfaces.AuthtokenDAO;
+import edu.byu.cs.tweeter.server.dao.interfaces.FollowDAO;
 import edu.byu.cs.tweeter.server.dao.interfaces.UserDAO;
 import edu.byu.cs.tweeter.util.DataAccessException;
 import edu.byu.cs.tweeter.util.FakeData;
+import edu.byu.cs.tweeter.util.ResultsPage;
 
 public class UserService {
 
@@ -49,7 +52,7 @@ public class UserService {
             return new LoginResponse(e.getMessage());
         }
 
-        AuthToken authToken = getAuthtokenDAO().newAuthtoken();
+        AuthToken authToken = getAuthtokenDAO().newAuthtoken(request.getUsername());
 
         if(user == null){
             throw new RuntimeException("[BadRequest] invalid username/password");
@@ -107,7 +110,7 @@ public class UserService {
 
         try{
             newUser = getUserDAO().registerUser(request);
-            authtoken = getAuthtokenDAO().newAuthtoken();
+            authtoken = getAuthtokenDAO().newAuthtoken(request.getUsername());
         }catch (Exception ex){
             return new LoginResponse(ex.getMessage());
         }
@@ -128,9 +131,11 @@ public class UserService {
         } else if(request.getUser() == null){
             throw new RuntimeException("[BadRequest] missing user");
         }
+        PagedRequest pagedRequest = new PagedRequest(request.getAuthToken(),request.getUser(), 1000000, null);
 
-        // TODO: Generates dummy data. Replace with a real implementation.
-        return new IntResponse(20);
+        ResultsPage resultsPage = getFollowDAO().getFollowers(pagedRequest);
+
+        return new IntResponse(resultsPage.getValues().size());
     }
 
     public IntResponse getFollowingCount(TargetUserRequest request) {
@@ -140,8 +145,11 @@ public class UserService {
             throw new RuntimeException("[BadRequest] missing user");
         }
 
-        // TODO: Generates dummy data. Replace with a real implementation.
-        return new IntResponse(20);
+        PagedRequest pagedRequest = new PagedRequest(request.getAuthToken(),request.getUser(), 1000000, null);
+
+        ResultsPage resultsPage = getFollowDAO().getFollowees(pagedRequest);
+
+        return new IntResponse(resultsPage.getValues().size());
     }
 
     public UserResponse getUser(TargetUserRequest request) {
@@ -197,6 +205,8 @@ public class UserService {
     UserDAO getUserDAO(){
         return daoFactory.getUserDAO();
     }
+
+    FollowDAO getFollowDAO(){return daoFactory.getFollowDao();}
 
     AuthtokenDAO getAuthtokenDAO(){
         return daoFactory.getAuthtokenDAO();

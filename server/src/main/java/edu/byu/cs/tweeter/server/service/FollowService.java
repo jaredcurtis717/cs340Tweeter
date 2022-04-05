@@ -78,6 +78,7 @@ public class FollowService {
         } else if(request.getLimit() <= 0) {
             throw new RuntimeException("[BadRequest] Request needs to have a positive limit");
         }
+        System.out.println("About to validate");
         getAuthtokenDAO().validate(request.getAuthToken());
 
         ResultsPage resultsPage = getFollowDAO().getFollowers(request);
@@ -103,9 +104,15 @@ public class FollowService {
         } else if(request.getUser() == null) {
             throw new RuntimeException("[BadRequest] Request needs to have user to follow");
         }
+        String currentUser = getAuthtokenDAO().validate(request.getAuthToken());
 
-        // TODO: Generates dummy data. Replace with a real implementation.
-        return new Response(true, null);
+        if (getFollowDAO().follow(currentUser, request.getUser())){
+            return new Response(true, null);
+        }
+        else{
+            return new Response(false, "unable to follow " + request.getUser());
+        }
+
     }
 
     public Response unfollow(TargetUserRequest request) {

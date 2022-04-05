@@ -5,7 +5,7 @@ import edu.byu.cs.tweeter.model.net.request.AuthTokenRequest;
 import edu.byu.cs.tweeter.util.DataAccessException;
 
 public interface AuthtokenDAO {
-    AuthToken newAuthtoken();
-    void validate(AuthToken token);
+    AuthToken newAuthtoken(String currentUser);
+    String validate(AuthToken token);
     void removeToken(AuthTokenRequest request) throws DataAccessException;
 }

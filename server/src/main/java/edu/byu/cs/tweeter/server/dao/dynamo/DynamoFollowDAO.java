@@ -3,6 +3,8 @@ package edu.byu.cs.tweeter.server.dao.dynamo;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
+import com.amazonaws.services.dynamodbv2.document.Item;
+import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.QueryRequest;
 import com.amazonaws.services.dynamodbv2.model.QueryResult;
@@ -224,6 +226,15 @@ public class DynamoFollowDAO implements FollowDAO {
         return new FollowingResponse(responseFollowees, hasMorePages);
         */
 
+    }
+
+    @Override
+    public boolean follow(String currentUser, String targetAlias) {
+        Table table = dynamoDB.getTable(followsTableName);
+        Item item = new Item()
+                .withPrimaryKey(followerAttribute, currentUser, followeeAttribute, targetAlias);
+        table.putItem(item);
+        return true;
     }
 
     /**

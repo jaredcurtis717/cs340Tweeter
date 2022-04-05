@@ -51,6 +51,8 @@ public class DynamoUserDAO implements UserDAO {
     private static final String image = "image_url";
     private static final String password = "password";
     private static final String salt = "salt";
+    private static final String followers = "followers";
+    private static final String followees = "followees";
 
     @Override
     public User getUser(String userHandle) {

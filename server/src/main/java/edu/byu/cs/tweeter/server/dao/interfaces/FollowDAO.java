@@ -11,4 +11,5 @@ public interface FollowDAO {
     public Integer getFolloweeCount(User follower);
     public ResultsPage getFollowees(PagedRequest request);
     public ResultsPage getFollowers(PagedRequest request);
+    public boolean follow(String currentUser, String targetAlias);
 }
