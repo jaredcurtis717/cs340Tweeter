@@ -5,6 +5,7 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.Table;
+import com.amazonaws.services.dynamodbv2.document.spec.GetItemSpec;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.QueryRequest;
 import com.amazonaws.services.dynamodbv2.model.QueryResult;
@@ -37,18 +38,7 @@ public class DynamoFollowDAO implements FollowDAO {
             .build();
     private static final DynamoDB dynamoDB = new DynamoDB(amazonDynamoDB);
 
-    /**
-     * Gets the count of users from the database that the user specified is following. The
-     * current implementation uses generated data and doesn't actually access a database.
-     *
-     * @param follower the User whose count of how many following is desired.
-     * @return said count.
-     */
-    public Integer getFolloweeCount(User follower) {
-        // TODO: uses the dummy data.  Replace with a real implementation.
-        assert follower != null;
-        return getDummyFollowees().size();
-    }
+
 
     /**
      * Gets the users from the database that the user specified in the request is following. Uses
@@ -235,6 +225,24 @@ public class DynamoFollowDAO implements FollowDAO {
                 .withPrimaryKey(followerAttribute, currentUser, followeeAttribute, targetAlias);
         table.putItem(item);
         return true;
+    }
+
+    @Override
+    public boolean unfollow(String currentUser, String targetAlias) {
+        Table table = dynamoDB.getTable(followsTableName);
+        table.deleteItem(followerAttribute, currentUser, followeeAttribute, targetAlias);
+        return true;
+    }
+
+    @Override
+    public boolean isFollowing(String user, String targetUser) {
+        Table table = dynamoDB.getTable(followsTableName);
+        try{
+            Item item = table.getItem(followerAttribute, user, followeeAttribute, targetUser);
+            return (item != null);
+        } catch (Exception exception) {
+            return false;
+        }
     }
 
     /**

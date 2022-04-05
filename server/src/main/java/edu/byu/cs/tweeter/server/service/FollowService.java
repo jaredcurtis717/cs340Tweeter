@@ -1,5 +1,7 @@
 package edu.byu.cs.tweeter.server.service;
 
+import com.amazonaws.services.dynamodbv2.xspec.B;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -107,6 +109,7 @@ public class FollowService {
         String currentUser = getAuthtokenDAO().validate(request.getAuthToken());
 
         if (getFollowDAO().follow(currentUser, request.getUser())){
+
             return new Response(true, null);
         }
         else{
@@ -122,8 +125,15 @@ public class FollowService {
             throw new RuntimeException("[BadRequest] Request needs to have user to unfollow");
         }
 
-        // TODO: Generates dummy data. Replace with a real implementation.
-        return new Response(true, null);
+        String currentUser = getAuthtokenDAO().validate(request.getAuthToken());
+
+        if (getFollowDAO().unfollow(currentUser, request.getUser())){
+
+            return new Response(true, null);
+        }
+        else{
+            return new Response(false, "unable to follow " + request.getUser());
+        }
     }
 
     public BoolResponse isFollowing(IsFollowerRequest request) {
@@ -135,8 +145,10 @@ public class FollowService {
             throw new RuntimeException("[BadRequest] Request a follower");
         }
 
-        // TODO: Generates dummy data. Replace with a real implementation.
-        return new BoolResponse(true);
+        getAuthtokenDAO().validate(request.getAuthToken());
+
+        return new BoolResponse(getFollowDAO().isFollowing(request.getFollower(), request.getFollowee()));
+
     }
 
     /**
