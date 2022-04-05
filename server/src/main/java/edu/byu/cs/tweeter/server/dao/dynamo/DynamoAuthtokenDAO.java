@@ -56,7 +56,7 @@ public class DynamoAuthtokenDAO implements AuthtokenDAO {
             throw new RuntimeException("[BadRequest] Invalid Authtoken");
         }
 
-        System.out.println("got token from table");
+        //System.out.println("got token from table");
 
         String itemTimeStamp = item.getString(timestamp);
         long timeToCheck = Long.parseLong(itemTimeStamp);
@@ -67,7 +67,7 @@ public class DynamoAuthtokenDAO implements AuthtokenDAO {
             throw new RuntimeException("[BadRequest] Authtoken timed out");
         }
 
-        System.out.println("Checked timeout");
+        //System.out.println("Checked timeout");
 
         String newTime = String.valueOf(milliSeconds);
 
@@ -75,11 +75,12 @@ public class DynamoAuthtokenDAO implements AuthtokenDAO {
                 .withPrimaryKey(token, authToken.getToken())
                 .withString(timestamp, newTime);
 
-        System.out.println("Created new item to place in table");
+        //System.out.println("Created new item to place in table");
 
         table.putItem(updateItem);
 
-        System.out.println("Placed item in table");
+        //System.out.println("Placed item in table");
+        System.out.println("Validated");
     }
 
     @Override

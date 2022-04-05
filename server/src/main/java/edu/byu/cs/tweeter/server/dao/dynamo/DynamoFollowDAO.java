@@ -7,14 +7,12 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.QueryRequest;
 import com.amazonaws.services.dynamodbv2.model.QueryResult;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.PagedRequest;
-import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
 import edu.byu.cs.tweeter.server.dao.interfaces.FollowDAO;
 import edu.byu.cs.tweeter.util.FakeData;
 import edu.byu.cs.tweeter.util.ResultsPage;
@@ -61,7 +59,8 @@ public class DynamoFollowDAO implements FollowDAO {
      */
     public ResultsPage getFollowees(PagedRequest request) {
 
-        System.out.println(request.getAlias() + " = alias \n" +
+        System.out.println("In getFollowees in DAO" + "\n" +
+                request.getAlias() + " = alias \n" +
                 request.getLastItem() + " = last item");
 
         Map<String, String> attrNames = new HashMap<>();
@@ -93,6 +92,7 @@ public class DynamoFollowDAO implements FollowDAO {
         System.out.println("items = " + items.toString());
 
         for (Map<String, AttributeValue> item : items){
+            System.out.println("Followee item: " + item.toString());
             String followeeHandle = item.get(followeeAttribute).getS();
             resultsPage.addValue(followeeHandle);
         }
@@ -101,6 +101,8 @@ public class DynamoFollowDAO implements FollowDAO {
         if (lastKey != null) {
             resultsPage.setLastKey(lastKey.get(followeeAttribute).getS());
         }
+
+        System.out.println("Get followees returning: " + resultsPage.getValues().toString());
 
         return resultsPage;
 
@@ -146,19 +148,22 @@ public class DynamoFollowDAO implements FollowDAO {
      * @return the followers.
      */
     public ResultsPage getFollowers(PagedRequest request) {
-        System.out.println(request.getAlias() + " = alias \n" +
+        System.out.println("In getFollowers in DAO" + "\n" +
+                request.getAlias() + " = alias \n" +
                 request.getLastItem() + " = last item");
 
         Map<String, String> attrNames = new HashMap<>();
-        attrNames.put("#fol", followeeAttribute);
+        attrNames.put("#followeeAttribute", followeeAttribute);
 
         Map<String, AttributeValue> attrValues = new HashMap<>();
         attrValues.put(":followee", new AttributeValue().withS(request.getAlias()));
 
+        //System.out.println("followsTableName = " + followsTableName);
+        //System.out.println("followsTableIndex = " + followsTableIndexName);
         QueryRequest queryRequest = new QueryRequest()
                 .withTableName(followsTableName)
                 .withIndexName(followsTableIndexName)
-                .withKeyConditionExpression("#fol = :followee")
+                .withKeyConditionExpression("#followeeAttribute = :followee")
                 .withExpressionAttributeNames(attrNames)
                 .withExpressionAttributeValues(attrValues)
                 .withLimit(request.getLimit());
@@ -179,15 +184,19 @@ public class DynamoFollowDAO implements FollowDAO {
         System.out.println("items = " + items.toString());
 
         for (Map<String, AttributeValue> item : items){
+            System.out.println("Follower item: " + item.toString());
             String followerHandle = item.get(followerAttribute).getS();
             resultsPage.addValue(followerHandle);
         }
 
+        System.out.println("Followers: " + resultsPage.getValues());
 
         Map<String, AttributeValue> lastKey = queryResult.getLastEvaluatedKey();
         if (lastKey != null) {
             resultsPage.setLastKey(lastKey.get(followerAttribute).getS());
         }
+
+        System.out.println("Get followers returning: " + resultsPage.getValues().toString());
 
         return resultsPage;
 

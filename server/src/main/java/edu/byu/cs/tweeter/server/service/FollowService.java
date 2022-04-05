@@ -51,6 +51,7 @@ public class FollowService {
 
         UserDAO userDAO = getUserDAO();
 
+        System.out.println("Service layer looping through: " + resultsPage.getValues().toString());
         for(String followeeHandle : resultsPage.getValues()){
             try{
                 followeeUsers.add(userDAO.getUser(followeeHandle));
@@ -84,6 +85,7 @@ public class FollowService {
 
         UserDAO userDAO = getUserDAO();
 
+        System.out.println("Service layer looping through: " + resultsPage.getValues().toString());
         for(String followerHandle : resultsPage.getValues()){
             try{
                 followerUsers.add(userDAO.getUser(followerHandle));
