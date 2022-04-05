@@ -1,7 +1,5 @@
 package edu.byu.cs.tweeter.server.service;
 
-import com.amazonaws.services.dynamodbv2.xspec.B;
-
 import java.util.ArrayList;
 import java.util.List;
 

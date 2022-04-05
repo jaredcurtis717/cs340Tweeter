@@ -7,6 +7,7 @@ import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.PrimaryKey;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.document.spec.DeleteItemSpec;
+import com.amazonaws.services.dynamodbv2.xspec.S;
 
 import java.util.Date;
 import java.util.UUID;
@@ -57,9 +58,12 @@ public class DynamoAuthtokenDAO implements AuthtokenDAO {
 
     @Override
     public String validate(AuthToken authToken) {
+        System.out.println("In validate");
         Table table = dynamoDB.getTable(tableName);
+        System.out.println("Created table, about to get token");
         Item item = table.getItem(token, authToken.getToken());
         if (item == null){
+            System.out.println("token was null");
             throw new RuntimeException("[BadRequest] Invalid Authtoken");
         }
 

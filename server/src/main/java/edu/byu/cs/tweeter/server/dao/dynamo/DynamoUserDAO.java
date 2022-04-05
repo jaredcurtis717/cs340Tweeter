@@ -51,8 +51,6 @@ public class DynamoUserDAO implements UserDAO {
     private static final String image = "image_url";
     private static final String password = "password";
     private static final String salt = "salt";
-    private static final String followers = "followers";
-    private static final String followees = "followees";
 
     @Override
     public User getUser(String userHandle) {
@@ -109,7 +107,7 @@ public class DynamoUserDAO implements UserDAO {
     }
 
     @Override
-    public User login(LoginRequest request) throws DataAccessException {
+    public User login(LoginRequest request){
         Table table = dynamoDB.getTable(tableName);
 
         Item item = table.getItem(alias, request.getUsername());
