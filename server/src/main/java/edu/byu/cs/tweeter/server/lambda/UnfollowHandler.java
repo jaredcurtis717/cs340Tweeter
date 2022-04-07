@@ -5,6 +5,7 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 
 import edu.byu.cs.tweeter.model.net.request.TargetUserRequest;
 import edu.byu.cs.tweeter.model.net.response.Response;
+import edu.byu.cs.tweeter.server.dao.dynamo.DynamoDAOFactory;
 import edu.byu.cs.tweeter.server.service.FollowService;
 
 public class UnfollowHandler implements RequestHandler<TargetUserRequest, Response> {
@@ -17,7 +18,7 @@ public class UnfollowHandler implements RequestHandler<TargetUserRequest, Respon
      */
     @Override
     public Response handleRequest(TargetUserRequest input, Context context) {
-        FollowService followService = new FollowService();
+        FollowService followService = new FollowService(new DynamoDAOFactory());
         return followService.unfollow(input);
     }
 }

@@ -4,34 +4,71 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.AuthTokenRequest;
 import edu.byu.cs.tweeter.model.net.request.LoginRequest;
+import edu.byu.cs.tweeter.model.net.request.PagedRequest;
 import edu.byu.cs.tweeter.model.net.request.RegisterRequest;
 import edu.byu.cs.tweeter.model.net.request.TargetUserRequest;
 import edu.byu.cs.tweeter.model.net.response.IntResponse;
 import edu.byu.cs.tweeter.model.net.response.LoginResponse;
 import edu.byu.cs.tweeter.model.net.response.Response;
 import edu.byu.cs.tweeter.model.net.response.UserResponse;
+import edu.byu.cs.tweeter.server.dao.DAOFactory;
+import edu.byu.cs.tweeter.server.dao.interfaces.AuthtokenDAO;
+import edu.byu.cs.tweeter.server.dao.interfaces.FollowDAO;
+import edu.byu.cs.tweeter.server.dao.interfaces.UserDAO;
+import edu.byu.cs.tweeter.util.DataAccessException;
 import edu.byu.cs.tweeter.util.FakeData;
+import edu.byu.cs.tweeter.util.ResultsPage;
 
 public class UserService {
 
+    private final DAOFactory daoFactory;
+
+    public UserService(DAOFactory daoFactory){
+        this.daoFactory = daoFactory;
+    }
+
     public LoginResponse login(LoginRequest request) {
+        System.out.println("Received request: " + request.toString());
+
         if(request.getUsername() == null){
             throw new RuntimeException("[BadRequest] Missing a username");
         } else if(request.getPassword() == null) {
             throw new RuntimeException("[BadRequest] Missing a password");
         }
 
-        // TODO: Generates dummy data. Replace with a real implementation.
+        User user;
+        try{
+            user = getUserDAO().login(request);
+        } catch (Exception e) {
+            return new LoginResponse(e.getMessage());
+        }
+
+        AuthToken authToken = getAuthtokenDAO().newAuthtoken(request.getUsername());
+
+        if(user == null){
+            throw new RuntimeException("[BadRequest] invalid username/password");
+        }
+
+        return new LoginResponse(user, authToken);
+        /*
+        // old dummy implementation
         User user = getDummyUser();
         AuthToken authToken = getDummyAuthToken();
         return new LoginResponse(user, authToken);
+         */
     }
 
     public Response logout(AuthTokenRequest request) {
         if (request.getAuthToken() == null){
             throw new RuntimeException("[BadRequest] invalid authToken");
         }
-        // TODO: Generates dummy data. Replace with a real implementation.
+        try{
+
+            getAuthtokenDAO().removeToken(request);
+        } catch (DataAccessException e) {
+            throw new RuntimeException("[BadRequest] Unable to delete authtoken");
+        }
+
         return new Response(true);
     }
 
@@ -48,11 +85,35 @@ public class UserService {
             throw new RuntimeException("[BadRequest] Missing an image");
         }
 
+        User newUser;
+        AuthToken authtoken;
+        User userShouldNotExist = null;
+        try{
+            //expecting an exception letting us know the user doesn't exist
+             userShouldNotExist = getUserDAO().getUser(request.getUsername());
+        }catch (Exception ignored){
+        }
 
-        // TODO: Generates dummy data. Replace with a real implementation.
+        if (userShouldNotExist != null){
+            throw new RuntimeException("[BadRequest] user already exists");
+        }
+        System.out.println("User doesn't exist, creating new user");
+
+        try{
+            newUser = getUserDAO().registerUser(request);
+            authtoken = getAuthtokenDAO().newAuthtoken(request.getUsername());
+        }catch (Exception ex){
+            return new LoginResponse(ex.getMessage());
+        }
+
+        return new LoginResponse(newUser, authtoken);
+
+        /*
+        // old fake data implementation
         User user = getDummyUser();
         AuthToken authToken = getDummyAuthToken();
         return new LoginResponse(user, authToken);
+         */
     }
 
     public IntResponse getFollowerCount(TargetUserRequest request) {
@@ -61,9 +122,11 @@ public class UserService {
         } else if(request.getUser() == null){
             throw new RuntimeException("[BadRequest] missing user");
         }
+        PagedRequest pagedRequest = new PagedRequest(request.getAuthToken(),request.getUser(), 1000000, null);
 
-        // TODO: Generates dummy data. Replace with a real implementation.
-        return new IntResponse(20);
+        ResultsPage resultsPage = getFollowDAO().getFollowers(pagedRequest);
+
+        return new IntResponse(resultsPage.getValues().size());
     }
 
     public IntResponse getFollowingCount(TargetUserRequest request) {
@@ -73,8 +136,11 @@ public class UserService {
             throw new RuntimeException("[BadRequest] missing user");
         }
 
-        // TODO: Generates dummy data. Replace with a real implementation.
-        return new IntResponse(20);
+        PagedRequest pagedRequest = new PagedRequest(request.getAuthToken(),request.getUser(), 1000000, null);
+
+        ResultsPage resultsPage = getFollowDAO().getFollowees(pagedRequest);
+
+        return new IntResponse(resultsPage.getValues().size());
     }
 
     public UserResponse getUser(TargetUserRequest request) {
@@ -84,8 +150,17 @@ public class UserService {
             throw new RuntimeException("[BadRequest] missing user");
         }
 
-        // TODO: Generates dummy data. Replace with a real implementation.
-        return new UserResponse(getFakeData().findUserByAlias(request.getUser()));
+        getAuthtokenDAO().validate(request.getAuthToken());
+
+        User answerUser;
+        try{
+            answerUser = getUserDAO().getUser(request.getUser());
+        } catch (DataAccessException e) {
+            e.printStackTrace();
+            throw new RuntimeException("[BadRequest] failed to get user");
+        }
+
+        return new UserResponse(answerUser);
     }
 
     /**
@@ -118,6 +193,14 @@ public class UserService {
         return new FakeData();
     }
 
+    UserDAO getUserDAO(){
+        return daoFactory.getUserDAO();
+    }
 
+    FollowDAO getFollowDAO(){return daoFactory.getFollowDao();}
+
+    AuthtokenDAO getAuthtokenDAO(){
+        return daoFactory.getAuthtokenDAO();
+    }
 
 }

@@ -21,12 +21,15 @@ public class GetFollowingTask extends PagedUserTask {
     @Override
     protected void runTask() throws Exception {
         PagedRequest request;
+        System.out.println("User to get following: " + getTargetUser().toString());
         if (getLastItem() == null){
             request = new PagedRequest(getAuthToken(), getTargetUser().getAlias(), getLimit(), null);
         }
         else{
             request = new PagedRequest(getAuthToken(), getTargetUser().getAlias(), getLimit(), getLastItem().getAlias());
         }
+        //System.out.println("Target User alias: " + getTargetUser().getAlias());
+
         FollowingResponse response = getServerFacade().getFollowees(request, URL_PATH);
 
         if (response.isSuccess()){

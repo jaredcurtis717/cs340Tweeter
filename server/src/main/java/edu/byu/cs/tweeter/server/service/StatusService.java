@@ -1,11 +1,26 @@
 package edu.byu.cs.tweeter.server.service;
 
+import com.google.gson.Gson;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.net.request.PagedRequest;
 import edu.byu.cs.tweeter.model.net.request.PostStatusRequest;
 import edu.byu.cs.tweeter.model.net.response.Response;
 import edu.byu.cs.tweeter.model.net.response.StatusesResponse;
+import edu.byu.cs.tweeter.server.dao.dynamo.DynamoAuthtokenDAO;
 import edu.byu.cs.tweeter.server.dao.dynamo.DynamoFollowDAO;
 import edu.byu.cs.tweeter.server.dao.dynamo.DynamoStatusDAO;
+import edu.byu.cs.tweeter.server.dao.dynamo.DynamoUserDAO;
+import edu.byu.cs.tweeter.server.dao.interfaces.AuthtokenDAO;
+import edu.byu.cs.tweeter.server.dao.interfaces.FollowDAO;
+import edu.byu.cs.tweeter.server.dao.interfaces.StatusDAO;
+import edu.byu.cs.tweeter.server.dao.interfaces.UserDAO;
+import edu.byu.cs.tweeter.util.AlmostStatus;
+import edu.byu.cs.tweeter.util.DataAccessException;
+import edu.byu.cs.tweeter.util.ResultsPage;
 
 /**
  * Contains the business logic for getting the users a user is following.
@@ -27,8 +42,30 @@ public class StatusService {
         } else if(request.getLimit() <= 0) {
             throw new RuntimeException("[BadRequest] Request needs to have a positive limit");
         }
-        return getStatusesDAO().getFeed(request);
+        getAuthtokenDAO().validate(request.getAuthToken());
+
+        ResultsPage<AlmostStatus> resultsPage = getStatusesDAO().getFeed(request);
+
+        List<Status> feedStatuses = new ArrayList<>();
+
+        System.out.println("Got Feed.  Almost statuses are: " + resultsPage.getValues().toString());
+        for(AlmostStatus sta : resultsPage.getValues()){
+            try{
+                feedStatuses.add(new Status(sta.getPost(),
+                        getUserDAO().getUser(sta.getUser()),
+                        sta.getDate(),
+                        sta.getUrls(),
+                        sta.getMentions()
+                ));
+            } catch (DataAccessException e) {
+                throw new RuntimeException("[BadRequest] couldn't get user of one of the statusus in the feed");
+            }
+        }
+        System.out.println("Created list of statuses, about to return.  Statuses: " + feedStatuses.toString());
+        System.out.println("Has last key? " + resultsPage.hasLastKey());
+        return new StatusesResponse(feedStatuses, resultsPage.hasLastKey());
     }
+
 
     /**
      * Returns the story of the given user. Uses information in
@@ -45,7 +82,28 @@ public class StatusService {
         } else if(request.getLimit() <= 0) {
             throw new RuntimeException("[BadRequest] Request needs to have a positive limit");
         }
-        return getStatusesDAO().getStory(request);
+        getAuthtokenDAO().validate(request.getAuthToken());
+
+        ResultsPage<AlmostStatus> resultsPage = getStatusesDAO().getStory(request);
+        List<Status> storyStatuses = new ArrayList<>();
+
+        System.out.println("Got almostStatuses" + resultsPage.getValues().toString());
+
+        for(AlmostStatus sta : resultsPage.getValues()){
+            try{
+                storyStatuses.add(new Status(sta.getPost(),
+                        getUserDAO().getUser(sta.getUser()),
+                        sta.getDate(),
+                        sta.getUrls(),
+                        sta.getMentions()
+                ));
+            } catch (DataAccessException e) {
+                throw new RuntimeException("[BadRequest] couldn't get user of one of the statusus in the feed");
+            }
+        }
+        System.out.println("created statuses, about to return.  Statuses: " + storyStatuses.toString());
+
+        return new StatusesResponse(storyStatuses, resultsPage.hasLastKey());
     }
 
     public Response postStatus(PostStatusRequest request) {
@@ -55,7 +113,17 @@ public class StatusService {
             throw new RuntimeException("[BadRequest] Request needs to have a status to post");
         }
 
-        //Todo: this sends dummy data
+        String currentUser = getAuthtokenDAO().validate(request.getAuthToken());
+
+        getStatusesDAO().addStatusToStory(currentUser, request.getStatus());
+
+        List<String> followers = getFollowDAO()
+                .getFollowers(new PagedRequest(request.getAuthToken(), currentUser, 1000000, null))
+                .getValues();
+
+        for(String follower : followers){
+            getStatusesDAO().addStatusToFeed(follower, request.getStatus());
+        }
         return new Response(true);
     }
 
@@ -66,9 +134,13 @@ public class StatusService {
      *
      * @return the instance.
      */
-    DynamoStatusDAO getStatusesDAO() {
+    StatusDAO getStatusesDAO() {
         return new DynamoStatusDAO();
     }
 
+    UserDAO getUserDAO(){return new DynamoUserDAO();}
 
+    AuthtokenDAO getAuthtokenDAO(){return new DynamoAuthtokenDAO();}
+
+    FollowDAO getFollowDAO(){return new DynamoFollowDAO();}
 }

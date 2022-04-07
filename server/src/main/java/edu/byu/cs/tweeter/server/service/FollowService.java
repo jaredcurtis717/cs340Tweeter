@@ -1,17 +1,33 @@
 package edu.byu.cs.tweeter.server.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.IsFollowerRequest;
 import edu.byu.cs.tweeter.model.net.request.PagedRequest;
 import edu.byu.cs.tweeter.model.net.request.TargetUserRequest;
 import edu.byu.cs.tweeter.model.net.response.BoolResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
 import edu.byu.cs.tweeter.model.net.response.Response;
+import edu.byu.cs.tweeter.server.dao.DAOFactory;
 import edu.byu.cs.tweeter.server.dao.dynamo.DynamoFollowDAO;
+import edu.byu.cs.tweeter.server.dao.interfaces.AuthtokenDAO;
+import edu.byu.cs.tweeter.server.dao.interfaces.FollowDAO;
+import edu.byu.cs.tweeter.server.dao.interfaces.UserDAO;
+import edu.byu.cs.tweeter.util.DataAccessException;
+import edu.byu.cs.tweeter.util.ResultsPage;
 
 /**
  * Contains the business logic for getting the users a user is following.
  */
 public class FollowService {
+
+    private final DAOFactory daoFactory;
+
+    public FollowService(DAOFactory daoFactory){
+        this.daoFactory = daoFactory;
+    }
 
     /**
      * Returns the users that the user specified in the request is following. Uses information in
@@ -28,7 +44,23 @@ public class FollowService {
         } else if(request.getLimit() <= 0) {
             throw new RuntimeException("[BadRequest] Request needs to have a positive limit");
         }
-        return getFollowingDAO().getFollowees(request);
+        getAuthtokenDAO().validate(request.getAuthToken());
+
+        ResultsPage<String> resultsPage = getFollowDAO().getFollowees(request);
+        List<User> followeeUsers = new ArrayList<>();
+
+        UserDAO userDAO = getUserDAO();
+
+        System.out.println("Service layer looping through: " + resultsPage.getValues().toString());
+        for(String followeeHandle : resultsPage.getValues()){
+            try{
+                followeeUsers.add(userDAO.getUser(followeeHandle));
+            } catch (DataAccessException e) {
+                return new FollowingResponse(e.getMessage());
+            }
+        }
+
+        return new FollowingResponse(followeeUsers, resultsPage.hasLastKey());
     }
 
     /**
@@ -46,7 +78,24 @@ public class FollowService {
         } else if(request.getLimit() <= 0) {
             throw new RuntimeException("[BadRequest] Request needs to have a positive limit");
         }
-        return getFollowingDAO().getFollowers(request);
+        System.out.println("About to validate");
+        getAuthtokenDAO().validate(request.getAuthToken());
+
+        ResultsPage<String> resultsPage = getFollowDAO().getFollowers(request);
+        List<User> followerUsers = new ArrayList<>();
+
+        UserDAO userDAO = getUserDAO();
+
+        System.out.println("Service layer looping through: " + resultsPage.getValues().toString());
+        for(String followerHandle : resultsPage.getValues()){
+            try{
+                followerUsers.add(userDAO.getUser(followerHandle));
+            } catch (DataAccessException e) {
+                return new FollowingResponse(e.getMessage());
+            }
+        }
+
+        return new FollowingResponse(followerUsers, resultsPage.hasLastKey());
     }
 
     public Response follow(TargetUserRequest request) {
@@ -55,9 +104,16 @@ public class FollowService {
         } else if(request.getUser() == null) {
             throw new RuntimeException("[BadRequest] Request needs to have user to follow");
         }
+        String currentUser = getAuthtokenDAO().validate(request.getAuthToken());
 
-        // TODO: Generates dummy data. Replace with a real implementation.
-        return new Response(true, null);
+        if (getFollowDAO().follow(currentUser, request.getUser())){
+
+            return new Response(true, null);
+        }
+        else{
+            return new Response(false, "unable to follow " + request.getUser());
+        }
+
     }
 
     public Response unfollow(TargetUserRequest request) {
@@ -67,8 +123,15 @@ public class FollowService {
             throw new RuntimeException("[BadRequest] Request needs to have user to unfollow");
         }
 
-        // TODO: Generates dummy data. Replace with a real implementation.
-        return new Response(true, null);
+        String currentUser = getAuthtokenDAO().validate(request.getAuthToken());
+
+        if (getFollowDAO().unfollow(currentUser, request.getUser())){
+
+            return new Response(true, null);
+        }
+        else{
+            return new Response(false, "unable to follow " + request.getUser());
+        }
     }
 
     public BoolResponse isFollowing(IsFollowerRequest request) {
@@ -80,8 +143,10 @@ public class FollowService {
             throw new RuntimeException("[BadRequest] Request a follower");
         }
 
-        // TODO: Generates dummy data. Replace with a real implementation.
-        return new BoolResponse(true);
+        getAuthtokenDAO().validate(request.getAuthToken());
+
+        return new BoolResponse(getFollowDAO().isFollowing(request.getFollower(), request.getFollowee()));
+
     }
 
     /**
@@ -91,10 +156,14 @@ public class FollowService {
      *
      * @return the instance.
      */
-    DynamoFollowDAO getFollowingDAO() {
-        return new DynamoFollowDAO();
+    FollowDAO getFollowDAO() {
+        return daoFactory.getFollowDao();
     }
 
+    UserDAO getUserDAO(){
+        return daoFactory.getUserDAO();
+    }
 
+    AuthtokenDAO getAuthtokenDAO(){return daoFactory.getAuthtokenDAO();}
 
 }
