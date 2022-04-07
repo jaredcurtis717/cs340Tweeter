@@ -46,7 +46,7 @@ public class FollowService {
         }
         getAuthtokenDAO().validate(request.getAuthToken());
 
-        ResultsPage resultsPage = getFollowDAO().getFollowees(request);
+        ResultsPage<String> resultsPage = getFollowDAO().getFollowees(request);
         List<User> followeeUsers = new ArrayList<>();
 
         UserDAO userDAO = getUserDAO();
@@ -81,7 +81,7 @@ public class FollowService {
         System.out.println("About to validate");
         getAuthtokenDAO().validate(request.getAuthToken());
 
-        ResultsPage resultsPage = getFollowDAO().getFollowers(request);
+        ResultsPage<String> resultsPage = getFollowDAO().getFollowers(request);
         List<User> followerUsers = new ArrayList<>();
 
         UserDAO userDAO = getUserDAO();

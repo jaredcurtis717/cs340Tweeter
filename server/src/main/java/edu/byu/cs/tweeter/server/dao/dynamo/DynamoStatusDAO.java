@@ -9,6 +9,9 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.QueryRequest;
 import com.amazonaws.services.dynamodbv2.model.QueryResult;
 
+import java.text.Format;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +20,7 @@ import java.util.Map;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.net.request.PagedRequest;
 import edu.byu.cs.tweeter.server.dao.interfaces.StatusDAO;
+import edu.byu.cs.tweeter.util.AlmostStatus;
 import edu.byu.cs.tweeter.util.FakeData;
 import edu.byu.cs.tweeter.util.ResultsPage;
 
@@ -25,10 +29,12 @@ public class DynamoStatusDAO implements StatusDAO {
     private static final String storyTableName = "story";
 
     private static final String aliasAttribute = "alias";
+    private static final String statusOwnerAttribute = "status_owner";
     private static final String timestampAttribute = "timestamp";
     private static final String postAttribute = "post";
     private static final String urlsAttribute = "urls";
     private  static final String mentionsAttribute = "mentions";
+
 
     // DynamoDB client
     private static final AmazonDynamoDB amazonDynamoDB = AmazonDynamoDBClientBuilder
@@ -47,7 +53,9 @@ public class DynamoStatusDAO implements StatusDAO {
      *                other information required to satisfy the request.
      * @return the statuses.
      */
-    public ResultsPage getStory(PagedRequest request) {
+    public ResultsPage<AlmostStatus> getStory(PagedRequest request) {
+        System.out.println("Getting story for " + request.getAlias());
+
         Map<String, String> attrNames = new HashMap<>();
         attrNames.put("#alias", aliasAttribute);
 
@@ -70,21 +78,38 @@ public class DynamoStatusDAO implements StatusDAO {
             queryRequest = queryRequest.withExclusiveStartKey(startKey);
         }
 
+        System.out.println("About to query");
         QueryResult queryResult = amazonDynamoDB.query(queryRequest);
 
-        ResultsPage resultsPage = new ResultsPage();
+        ResultsPage<AlmostStatus> resultsPage = new ResultsPage<AlmostStatus>();
+        System.out.println("Query made");
 
         List<Map<String, AttributeValue>> items = queryResult.getItems();
         System.out.println("items = " + items.toString());
 
         for (Map<String, AttributeValue> item : items){
-            String statusGot = item.get(statusAttribute).getS();
-            resultsPage.addValue(statusGot);
+            String post = item.get(postAttribute).getS();
+            String poster = item.get(aliasAttribute).getS();
+            String dateTime = item.get(timestampAttribute).getS();
+            List<String> urls = item.get(urlsAttribute).getSS(); //SS vs NS?
+            List<String> mentions = item.get(mentionsAttribute).getSS();
+
+            if (urls == null){
+                urls = new ArrayList<>();
+            }
+            if (mentions == null){
+                mentions = new ArrayList<>();
+            }
+
+            resultsPage.addValue(new AlmostStatus(post, poster, dateTime, urls, mentions));
         }
 
         Map<String, AttributeValue> lastKey = queryResult.getLastEvaluatedKey();
+        if (resultsPage.getValues().size() <=0){
+            lastKey = null;
+        }
         if (lastKey != null) {
-            resultsPage.setLastKey(lastKey.get(statusAttribute).getS());
+            resultsPage.setLastKey(lastKey.get(timestampAttribute).getS());
         }
 
         System.out.println("Get story returning: " + resultsPage.getValues().toString());
@@ -102,7 +127,9 @@ public class DynamoStatusDAO implements StatusDAO {
      *                other information required to satisfy the request.
      * @return the statuses.
      */
-    public ResultsPage getFeed(PagedRequest request) {
+    public ResultsPage<AlmostStatus> getFeed(PagedRequest request) {
+
+        System.out.println("Getting Feed for" + request.getAlias());
 
         Map<String, String> attrNames = new HashMap<>();
         attrNames.put("#alias", aliasAttribute);
@@ -120,27 +147,45 @@ public class DynamoStatusDAO implements StatusDAO {
         if (isNonEmptyString(request.getLastItem())) {
             Map<String, AttributeValue> startKey = new HashMap<>();
             startKey.put(aliasAttribute, new AttributeValue().withS(request.getAlias()));
-            startKey.put(statusAttribute, new AttributeValue().withS(request.getLastItem()));
+            startKey.put(timestampAttribute, new AttributeValue().withS(request.getLastItem()));
 
             queryRequest = queryRequest.withExclusiveStartKey(startKey);
         }
 
+        System.out.println("About to query");
         QueryResult queryResult = amazonDynamoDB.query(queryRequest);
 
-        ResultsPage resultsPage = new ResultsPage();
+        ResultsPage<AlmostStatus> resultsPage = new ResultsPage<>();
+
+        System.out.println("Query made");
 
         List<Map<String, AttributeValue>> items = queryResult.getItems();
         System.out.println("items = " + items.toString());
 
         for (Map<String, AttributeValue> item : items){
-            String statusGot = item.get(statusAttribute).getS();
-            resultsPage.addValue(statusGot);
+            String post = item.get(postAttribute).getS();
+            String poster = item.get(statusOwnerAttribute).getS();
+            String dateTime = item.get(timestampAttribute).getS();
+            List<String> urls = item.get(urlsAttribute).getSS(); //SS vs NS?
+            List<String> mentions = item.get(mentionsAttribute).getSS();
+
+            if (urls == null){
+                urls = new ArrayList<>();
+            }
+            if (mentions == null){
+                mentions = new ArrayList<>();
+            }
+            resultsPage.addValue(new AlmostStatus(post, poster, dateTime, urls, mentions));
         }
 
         Map<String, AttributeValue> lastKey = queryResult.getLastEvaluatedKey();
-        if (lastKey != null) {
-            resultsPage.setLastKey(lastKey.get(statusAttribute).getS());
+        if (resultsPage.getValues().size() <=0){
+            lastKey = null;
         }
+        if (lastKey != null) {
+            resultsPage.setLastKey(lastKey.get(timestampAttribute).getS());
+        }
+
 
         System.out.println("Get feed returning: " + resultsPage.getValues().toString());
 
@@ -151,19 +196,23 @@ public class DynamoStatusDAO implements StatusDAO {
     public void addStatusToFeed(String user, Status status) {
         Table table = dynamoDB.getTable(feedTableName);
 
-        uploadStatus(user, status, table);
+        Item itemToUpload = getItemToUpload(user, status);
+        itemToUpload.withString(statusOwnerAttribute, status.getUser().getAlias());
+
+        table.putItem(itemToUpload);
     }
 
     @Override
     public void addStatusToStory(String user, Status status) {
         Table table = dynamoDB.getTable(storyTableName);
 
-        uploadStatus(user, status, table);
+        table.putItem(getItemToUpload(user, status));
     }
 
-    private void uploadStatus(String user, Status status, Table table) {
-        Date currentDate = new Date();
-        String currentTime = String.valueOf(currentDate.getTime());
+    private Item getItemToUpload(String user, Status status) {
+        Date date = new Date();
+        Format formatter = new SimpleDateFormat("yyyy-MM-dd");
+        String currentTime = formatter.format(date);
 
         Item item = new Item()
                 .withPrimaryKey(aliasAttribute, user, timestampAttribute, currentTime)
@@ -171,7 +220,7 @@ public class DynamoStatusDAO implements StatusDAO {
                 .withList(mentionsAttribute, status.getMentions())
                 .withList(urlsAttribute, status.getUrls());
 
-        table.putItem(item);
+        return item;
     }
 
     private static boolean isNonEmptyString(String value) {

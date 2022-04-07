@@ -13,9 +13,13 @@ import edu.byu.cs.tweeter.model.net.response.StatusesResponse;
 import edu.byu.cs.tweeter.server.dao.dynamo.DynamoAuthtokenDAO;
 import edu.byu.cs.tweeter.server.dao.dynamo.DynamoFollowDAO;
 import edu.byu.cs.tweeter.server.dao.dynamo.DynamoStatusDAO;
+import edu.byu.cs.tweeter.server.dao.dynamo.DynamoUserDAO;
 import edu.byu.cs.tweeter.server.dao.interfaces.AuthtokenDAO;
 import edu.byu.cs.tweeter.server.dao.interfaces.FollowDAO;
 import edu.byu.cs.tweeter.server.dao.interfaces.StatusDAO;
+import edu.byu.cs.tweeter.server.dao.interfaces.UserDAO;
+import edu.byu.cs.tweeter.util.AlmostStatus;
+import edu.byu.cs.tweeter.util.DataAccessException;
 import edu.byu.cs.tweeter.util.ResultsPage;
 
 /**
@@ -38,18 +42,27 @@ public class StatusService {
         } else if(request.getLimit() <= 0) {
             throw new RuntimeException("[BadRequest] Request needs to have a positive limit");
         }
-        System.out.println("About to call validate");
         getAuthtokenDAO().validate(request.getAuthToken());
 
-        System.out.println("About to call getFeed");
-        ResultsPage resultsPage = getStatusesDAO().getFeed(request);
+        ResultsPage<AlmostStatus> resultsPage = getStatusesDAO().getFeed(request);
+
         List<Status> feedStatuses = new ArrayList<>();
 
-        for(String sta : resultsPage.getValues()){
-            Status status = extractStatus(sta);
-            feedStatuses.add(status);
+        System.out.println("Got Feed.  Almost statuses are: " + resultsPage.getValues().toString());
+        for(AlmostStatus sta : resultsPage.getValues()){
+            try{
+                feedStatuses.add(new Status(sta.getPost(),
+                        getUserDAO().getUser(sta.getUser()),
+                        sta.getDate(),
+                        sta.getUrls(),
+                        sta.getMentions()
+                ));
+            } catch (DataAccessException e) {
+                throw new RuntimeException("[BadRequest] couldn't get user of one of the statusus in the feed");
+            }
         }
-
+        System.out.println("Created list of statuses, about to return.  Statuses: " + feedStatuses.toString());
+        System.out.println("Has last key? " + resultsPage.hasLastKey());
         return new StatusesResponse(feedStatuses, resultsPage.hasLastKey());
     }
 
@@ -71,13 +84,24 @@ public class StatusService {
         }
         getAuthtokenDAO().validate(request.getAuthToken());
 
-        ResultsPage resultsPage = getStatusesDAO().getStory(request);
+        ResultsPage<AlmostStatus> resultsPage = getStatusesDAO().getStory(request);
         List<Status> storyStatuses = new ArrayList<>();
 
-        for(String sta : resultsPage.getValues()){
-            Status status = extractStatus(sta);
-            storyStatuses.add(status);
+        System.out.println("Got almostStatuses" + resultsPage.getValues().toString());
+
+        for(AlmostStatus sta : resultsPage.getValues()){
+            try{
+                storyStatuses.add(new Status(sta.getPost(),
+                        getUserDAO().getUser(sta.getUser()),
+                        sta.getDate(),
+                        sta.getUrls(),
+                        sta.getMentions()
+                ));
+            } catch (DataAccessException e) {
+                throw new RuntimeException("[BadRequest] couldn't get user of one of the statusus in the feed");
+            }
         }
+        System.out.println("created statuses, about to return.  Statuses: " + storyStatuses.toString());
 
         return new StatusesResponse(storyStatuses, resultsPage.hasLastKey());
     }
@@ -113,6 +137,8 @@ public class StatusService {
     StatusDAO getStatusesDAO() {
         return new DynamoStatusDAO();
     }
+
+    UserDAO getUserDAO(){return new DynamoUserDAO();}
 
     AuthtokenDAO getAuthtokenDAO(){return new DynamoAuthtokenDAO();}
 

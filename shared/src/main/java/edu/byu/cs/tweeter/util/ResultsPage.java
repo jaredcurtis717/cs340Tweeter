@@ -3,12 +3,12 @@ package edu.byu.cs.tweeter.util;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ResultsPage {
+public class ResultsPage<T> {
 
     /**
      * The data values returned in this page of results
      */
-    private List<String> values;
+    private List<T> values;
 
     /**
      * The last value returned in this page of results
@@ -23,7 +23,7 @@ public class ResultsPage {
 
     // Values property
 
-    public void addValue(String v) {
+    public void addValue(T v) {
         values.add(v);
     }
 
@@ -31,7 +31,7 @@ public class ResultsPage {
         return (values != null && values.size() > 0);
     }
 
-    public List<String> getValues() {
+    public List<T> getValues() {
         return values;
     }
 
