@@ -1,5 +1,7 @@
 package edu.byu.cs.tweeter.server.dao.interfaces;
 
+import java.util.List;
+
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.net.request.PagedRequest;
 import edu.byu.cs.tweeter.model.net.response.StatusesResponse;
@@ -10,5 +12,6 @@ public interface StatusDAO {
     public ResultsPage<AlmostStatus> getStory(PagedRequest request);
     public ResultsPage<AlmostStatus> getFeed(PagedRequest request);
     public void addStatusToFeed(String user, Status status);
+    public void addStatusBatchToFeed(List<String> followers, Status status);
     public void addStatusToStory(String user, Status status);
 }

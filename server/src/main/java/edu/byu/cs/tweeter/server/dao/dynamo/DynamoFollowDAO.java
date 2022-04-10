@@ -2,12 +2,15 @@ package edu.byu.cs.tweeter.server.dao.dynamo;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
+import com.amazonaws.services.dynamodbv2.document.BatchWriteItemOutcome;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.Table;
+import com.amazonaws.services.dynamodbv2.document.TableWriteItems;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.QueryRequest;
 import com.amazonaws.services.dynamodbv2.model.QueryResult;
+import com.amazonaws.services.dynamodbv2.model.WriteRequest;
 
 import java.util.HashMap;
 import java.util.List;
@@ -134,20 +137,20 @@ public class DynamoFollowDAO implements FollowDAO {
      * next set of followers after any that were returned in a previous request. The current
      * implementation returns generated data and doesn't actually access a database.
      *
-     * @param request contains information about the user whose followers are to be returned and any
-     *                other information required to satisfy the request.
+     *
      * @return the followers.
      */
-    public ResultsPage getFollowers(PagedRequest request) {
+    public ResultsPage<String> getFollowers(String alias, String lastItem, int limit) {
+
         System.out.println("In getFollowers in DAO" + "\n" +
-                request.getAlias() + " = alias \n" +
-                request.getLastItem() + " = last item");
+                alias + " = alias \n" +
+                lastItem + " = last item");
 
         Map<String, String> attrNames = new HashMap<>();
         attrNames.put("#followeeAttribute", followeeAttribute);
 
         Map<String, AttributeValue> attrValues = new HashMap<>();
-        attrValues.put(":followee", new AttributeValue().withS(request.getAlias()));
+        attrValues.put(":followee", new AttributeValue().withS(alias));
 
         //System.out.println("followsTableName = " + followsTableName);
         //System.out.println("followsTableIndex = " + followsTableIndexName);
@@ -157,37 +160,38 @@ public class DynamoFollowDAO implements FollowDAO {
                 .withKeyConditionExpression("#followeeAttribute = :followee")
                 .withExpressionAttributeNames(attrNames)
                 .withExpressionAttributeValues(attrValues)
-                .withLimit(request.getLimit());
+                .withLimit(limit);
 
-        if (isNonEmptyString(request.getLastItem())) {
+        if (isNonEmptyString(lastItem)) {
             Map<String, AttributeValue> startKey = new HashMap<>();
-            startKey.put(followeeAttribute, new AttributeValue().withS(request.getAlias()));
-            startKey.put(followerAttribute, new AttributeValue().withS(request.getLastItem()));
-
+            startKey.put(followeeAttribute, new AttributeValue().withS(alias));
+            startKey.put(followerAttribute, new AttributeValue().withS(lastItem));
+            //System.out.println("Getting next page with last item value of: " + lastItem);
             queryRequest = queryRequest.withExclusiveStartKey(startKey);
         }
 
         QueryResult queryResult = amazonDynamoDB.query(queryRequest);
 
-        ResultsPage resultsPage = new ResultsPage();
+        ResultsPage<String> resultsPage = new ResultsPage<>();
 
         List<Map<String, AttributeValue>> items = queryResult.getItems();
-        System.out.println("items = " + items.toString());
+        //System.out.println("items = " + items.toString());
 
         for (Map<String, AttributeValue> item : items){
-            System.out.println("Follower item: " + item.toString());
+            //System.out.println("Follower item: " + item.toString());
             String followerHandle = item.get(followerAttribute).getS();
             resultsPage.addValue(followerHandle);
         }
 
-        System.out.println("Followers: " + resultsPage.getValues());
+        //System.out.println("Followers: " + resultsPage.getValues());
 
         Map<String, AttributeValue> lastKey = queryResult.getLastEvaluatedKey();
         if (lastKey != null) {
             resultsPage.setLastKey(lastKey.get(followerAttribute).getS());
         }
 
-        System.out.println("Get followers returning: " + resultsPage.getValues().toString());
+        System.out.println("Get followers returning: " + resultsPage.getValues().toString() +"\n"+
+                "getFollowers last key returning: " + resultsPage.getLastKey());
 
         return resultsPage;
 
@@ -241,6 +245,46 @@ public class DynamoFollowDAO implements FollowDAO {
             return (item != null);
         } catch (Exception exception) {
             return false;
+        }
+    }
+
+    @Override
+    public void addFollowersBatch(List<String> followers, String followTarget) {
+        // Constructor for TableWriteItems takes the name of the table, which I have stored in TABLE_USER
+        TableWriteItems items = new TableWriteItems(followsTableName);
+
+        // Add each user into the TableWriteItems object
+        for (String follower : followers) {
+            Item item = new Item()
+                    .withPrimaryKey(followerAttribute, follower, followeeAttribute, followTarget);
+            items.addItemToPut(item);
+
+            // 25 is the maximum number of items allowed in a single batch write.
+            // Attempting to write more than 25 items will result in an exception being thrown
+            if (items.getItemsToPut() != null && items.getItemsToPut().size() == 25) {
+                loopBatchWrite(items);
+                items = new TableWriteItems(followsTableName);
+            }
+        }
+
+        // Write any leftover items
+        if (items.getItemsToPut() != null && items.getItemsToPut().size() > 0) {
+            loopBatchWrite(items);
+        }
+    }
+
+    private void loopBatchWrite(TableWriteItems items) {
+
+        // The 'dynamoDB' object is of type DynamoDB and is declared statically in this example
+        BatchWriteItemOutcome outcome = dynamoDB.batchWriteItem(items);
+        System.out.println("Wrote follow Batch");
+
+        // Check the outcome for items that didn't make it onto the table
+        // If any were not added to the table, try again to write the batch
+        while (outcome.getUnprocessedItems().size() > 0) {
+            Map<String, List<WriteRequest>> unprocessedItems = outcome.getUnprocessedItems();
+            outcome = dynamoDB.batchWriteItemUnprocessed(unprocessedItems);
+            System.out.println("Wrote more follows");
         }
     }
 
