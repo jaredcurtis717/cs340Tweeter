@@ -122,9 +122,9 @@ public class UserService {
         } else if(request.getUser() == null){
             throw new RuntimeException("[BadRequest] missing user");
         }
-        PagedRequest pagedRequest = new PagedRequest(request.getAuthToken(),request.getUser(), 1000000, null);
+        getAuthtokenDAO().validate(request.getAuthToken());
 
-        ResultsPage resultsPage = getFollowDAO().getFollowers(pagedRequest);
+        ResultsPage<String> resultsPage = getFollowDAO().getFollowers(request.getUser(), null, 1000000);
 
         return new IntResponse(resultsPage.getValues().size());
     }

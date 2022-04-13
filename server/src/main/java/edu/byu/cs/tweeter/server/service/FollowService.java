@@ -81,7 +81,9 @@ public class FollowService {
         System.out.println("About to validate");
         getAuthtokenDAO().validate(request.getAuthToken());
 
-        ResultsPage<String> resultsPage = getFollowDAO().getFollowers(request);
+        ResultsPage<String> resultsPage = getFollowDAO()
+                .getFollowers(request.getAlias(), request.getLastItem(), request.getLimit());
+
         List<User> followerUsers = new ArrayList<>();
 
         UserDAO userDAO = getUserDAO();

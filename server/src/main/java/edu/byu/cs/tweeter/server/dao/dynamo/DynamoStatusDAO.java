@@ -2,12 +2,15 @@ package edu.byu.cs.tweeter.server.dao.dynamo;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
+import com.amazonaws.services.dynamodbv2.document.BatchWriteItemOutcome;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.Table;
+import com.amazonaws.services.dynamodbv2.document.TableWriteItems;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.QueryRequest;
 import com.amazonaws.services.dynamodbv2.model.QueryResult;
+import com.amazonaws.services.dynamodbv2.model.WriteRequest;
 
 import java.text.Format;
 import java.text.SimpleDateFormat;
@@ -203,6 +206,49 @@ public class DynamoStatusDAO implements StatusDAO {
     }
 
     @Override
+    public void addStatusBatchToFeed(List<String> followers, Status status) {
+        TableWriteItems items = new TableWriteItems(feedTableName);
+
+        // Add each user into the TableWriteItems object
+        for (String follower : followers) {
+            Item item = new Item()
+                    .withPrimaryKey(aliasAttribute, follower, timestampAttribute, status.getDate())
+                    .withString(postAttribute, status.getPost())
+                    .withString(statusOwnerAttribute, status.getUser().getAlias())
+                    .withList(mentionsAttribute, status.getMentions())
+                    .withList(urlsAttribute, status.getUrls());
+            items.addItemToPut(item);
+
+            // 25 is the maximum number of items allowed in a single batch write.
+            // Attempting to write more than 25 items will result in an exception being thrown
+            if (items.getItemsToPut() != null && items.getItemsToPut().size() == 25) {
+                loopBatchWrite(items);
+                items = new TableWriteItems(feedTableName);
+            }
+        }
+
+        // Write any leftover items
+        if (items.getItemsToPut() != null && items.getItemsToPut().size() > 0) {
+            loopBatchWrite(items);
+        }
+    }
+
+    private void loopBatchWrite(TableWriteItems items) {
+
+        // The 'dynamoDB' object is of type DynamoDB and is declared statically in this example
+        BatchWriteItemOutcome outcome = dynamoDB.batchWriteItem(items);
+        System.out.println("Wrote feed Batch");
+
+        // Check the outcome for items that didn't make it onto the table
+        // If any were not added to the table, try again to write the batch
+        while (outcome.getUnprocessedItems().size() > 0) {
+            Map<String, List<WriteRequest>> unprocessedItems = outcome.getUnprocessedItems();
+            outcome = dynamoDB.batchWriteItemUnprocessed(unprocessedItems);
+            System.out.println("Wrote extra feed items");
+        }
+    }
+
+    @Override
     public void addStatusToStory(String user, Status status) {
         Table table = dynamoDB.getTable(storyTableName);
 
@@ -211,11 +257,11 @@ public class DynamoStatusDAO implements StatusDAO {
 
     private Item getItemToUpload(String user, Status status) {
         Date date = new Date();
-        Format formatter = new SimpleDateFormat("yyyy-MM-dd");
-        String currentTime = formatter.format(date);
+        Long milliseconds = date.getTime();
+        String timeAdded = String.valueOf(milliseconds);
 
         Item item = new Item()
-                .withPrimaryKey(aliasAttribute, user, timestampAttribute, currentTime)
+                .withPrimaryKey(aliasAttribute, user, timestampAttribute, timeAdded)
                 .withString(postAttribute, status.getPost())
                 .withList(mentionsAttribute, status.getMentions())
                 .withList(urlsAttribute, status.getUrls());

@@ -1,5 +1,9 @@
 package edu.byu.cs.tweeter.server.service;
 
+import com.amazonaws.services.sqs.AmazonSQS;
+import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
+import com.amazonaws.services.sqs.model.SendMessageRequest;
+import com.amazonaws.services.sqs.model.SendMessageResult;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -18,14 +22,17 @@ import edu.byu.cs.tweeter.server.dao.interfaces.AuthtokenDAO;
 import edu.byu.cs.tweeter.server.dao.interfaces.FollowDAO;
 import edu.byu.cs.tweeter.server.dao.interfaces.StatusDAO;
 import edu.byu.cs.tweeter.server.dao.interfaces.UserDAO;
+import edu.byu.cs.tweeter.server.model.PostQDTO;
 import edu.byu.cs.tweeter.util.AlmostStatus;
 import edu.byu.cs.tweeter.util.DataAccessException;
+import edu.byu.cs.tweeter.util.JsonSerializer;
 import edu.byu.cs.tweeter.util.ResultsPage;
 
 /**
  * Contains the business logic for getting the users a user is following.
  */
 public class StatusService {
+    private static final String postQURL = "https://sqs.us-west-2.amazonaws.com/477351221852/postQ";
 
     /**
      * Returns the feed of the given user. Uses information in
@@ -112,8 +119,24 @@ public class StatusService {
         } else if(request.getStatus() == null) {
             throw new RuntimeException("[BadRequest] Request needs to have a status to post");
         }
-
         String currentUser = getAuthtokenDAO().validate(request.getAuthToken());
+
+        PostQDTO postQDTO = new PostQDTO(currentUser, request.getStatus());
+
+        SendMessageRequest send_msg_request = new SendMessageRequest()
+                .withQueueUrl(postQURL)
+                .withMessageBody(JsonSerializer.serialize(postQDTO));
+
+        AmazonSQS sqs = AmazonSQSClientBuilder.defaultClient();
+        SendMessageResult send_msg_result = sqs.sendMessage(send_msg_request);
+
+        String msgId = send_msg_result.getMessageId();
+        System.out.println("Message ID: " + msgId);
+
+        return new Response(true);
+
+        /*
+
 
         getStatusesDAO().addStatusToStory(currentUser, request.getStatus());
 
@@ -125,6 +148,7 @@ public class StatusService {
             getStatusesDAO().addStatusToFeed(follower, request.getStatus());
         }
         return new Response(true);
+         */
     }
 
     /**
