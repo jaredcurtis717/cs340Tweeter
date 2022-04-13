@@ -214,6 +214,7 @@ public class DynamoStatusDAO implements StatusDAO {
             Item item = new Item()
                     .withPrimaryKey(aliasAttribute, follower, timestampAttribute, status.getDate())
                     .withString(postAttribute, status.getPost())
+                    .withString(statusOwnerAttribute, status.getUser().getAlias())
                     .withList(mentionsAttribute, status.getMentions())
                     .withList(urlsAttribute, status.getUrls());
             items.addItemToPut(item);
@@ -257,9 +258,10 @@ public class DynamoStatusDAO implements StatusDAO {
     private Item getItemToUpload(String user, Status status) {
         Date date = new Date();
         Long milliseconds = date.getTime();
+        String timeAdded = String.valueOf(milliseconds);
 
         Item item = new Item()
-                .withPrimaryKey(aliasAttribute, user, timestampAttribute, milliseconds)
+                .withPrimaryKey(aliasAttribute, user, timestampAttribute, timeAdded)
                 .withString(postAttribute, status.getPost())
                 .withList(mentionsAttribute, status.getMentions())
                 .withList(urlsAttribute, status.getUrls());

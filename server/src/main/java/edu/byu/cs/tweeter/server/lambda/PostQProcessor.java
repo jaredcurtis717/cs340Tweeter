@@ -29,6 +29,8 @@ public class PostQProcessor implements RequestHandler<SQSEvent, Void> {
         for (SQSEvent.SQSMessage msg : input.getRecords()) {
             post = JsonSerializer.deserialize(msg.getBody(), PostQDTO.class);
 
+            FactoryManager.getDAOFactory().getStatusDAO().addStatusToStory(post.getStatus().getUser().getAlias(), post.getStatus());
+
             /*
             System.out.println("Received: ");
             System.out.print("sender: " + post.getUserAlias());

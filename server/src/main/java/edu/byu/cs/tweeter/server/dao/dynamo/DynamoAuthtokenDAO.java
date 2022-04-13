@@ -26,6 +26,7 @@ public class DynamoAuthtokenDAO implements AuthtokenDAO {
     private static final DynamoDB dynamoDB = new DynamoDB(amazonDynamoDB);
 
     private static final String tableName = "authenticationTokens";
+
     private static final String token = "token";
     private static final String timestamp = "timestamp";
     private static final String currentUser = "current_user";
